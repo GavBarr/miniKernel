@@ -4,12 +4,16 @@
 
 struct idt_entry{
 	
-	uint16_t handler_function;
-
+	uint16_t base_low;
+	uint16_t selector;
+	uint8_t zero; //always zero, unused by CPU
+	uint8_t flags;
+	uint16_t base_high;
+	
 
 };
 
-struct gdt_ptr{
+struct idt_ptr{
 
 	uint16_t limit;
 	uint32_t base;
@@ -17,9 +21,8 @@ struct gdt_ptr{
 };
 
 
-void gdt_init(void);
-void gdt_add_entry(int entry_index, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags);
-extern void gdt_flush(uint32_t gdt_ptr_address);
+void idt_init(void);
+extern void idt_load(uint32_t base)
 
 #endif
 
