@@ -22,7 +22,11 @@ struct idt_ptr{
 
 
 void idt_init(void);
-extern void idt_load(uint32_t base)
+extern void idt_load(uint32_t base);
+void isr_handler(void);
+static inline void outb(uint16_t port, uint8_t value);
+static inline uint8_t inb(uint16_t port);
+
 
 #endif
 

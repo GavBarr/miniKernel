@@ -1,0 +1,34 @@
+Notes for IDT
+
+1. Important Mechanisms to Understand
+ - IRQ : Interrupt Request from hardware
+	 *SIDE NOTE*
+	 On x86, vectors 0-31 are reserved for CPU exceptions, like divide by zero etc. This means that all
+	 hardware IRQ's must start at a vecotr >= 32. This all ties into the PIC remapping down below
+
+ - IDT : Interrupt Descriptor Table, where we define all of the interrupts (refer to idt.h for the stuct used).
+	 This is an array of 48 different interrupt request entries, each with elements pertaining to memory
+	 address where the interrupt procedure is stored, permissions and other flags (such as kernel ring)
+
+ - PIC : Controller that manages requests and actually talks with the CPU. This MUST be remapped after the IDT
+	 has all entries initialized, but before the IDT_POINTER is set. This is because of conflicts with CPU.
+	 The CPU already has the interrupts from 0-31 defined, so we must move the IDT entries that we defined
+	 from 0-31 to now start at 32.
+
+	 *IMPORTANT*
+	 There is the Master PIC (0x20 offset when remapping), that controls IRQ0->IRQ7, that talks directly to the CPU
+	 There is the Slave PIC (0x28 offset when remapping), that controls IRQ8->IRQ15, that signals to the Master's 
+	 IRQ2 that talks to the CPU.
+
+ - ISR : Interrupt Service Routine, once an interrupt request comes in this process halts any and all programs
+	 stores current states in the CPU registers (look at isr.asm for e.g.), clears to original state in the
+	 code segment of (0x08) and then proceeds to handle the interrupt. Once this interrupt has been handled
+	 appropriately all registers/CPU state is restored to before the interrupt occured. Otherwise your stack
+	 would be incorrect causing potential harmful bugs etc.
+
+2. Design Decisions
+ - idt.h : You'll notice there are two structs being defined, IDT and IDT_PTR both of which must be 8 bytes.
+	
+ - idt.c : 
+
+ - isr.asm :
