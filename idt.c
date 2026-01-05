@@ -56,7 +56,6 @@ extern void isr47(void);
 void idt_init(void){
 
 
-	pic_remap(32, 40);
 
 
 	idt_set_gate(0, (uint32_t)isr0, 0x08, 0x8E);
@@ -108,12 +107,15 @@ void idt_init(void){
 	idt_set_gate(46, (uint32_t)isr47, 0x08, 0x8E);
 	idt_set_gate(47, (uint32_t)isr48, 0x08, 0x8E);
 
+	pic_remap(32, 40);
+
 
 	i_ptr.limit = sizeof(idt) -1;
 	i_ptr.base = (uint32_t)&idt;
 
 	idt_load((uint32_t)&i_ptr);
 
+	__asm__ volatile("sti");
 }
 
 void idt_set_gate(uint8_t index, uint32_t handler_address, uint16_t selector, uint8_t flags){

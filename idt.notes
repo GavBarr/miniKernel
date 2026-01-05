@@ -26,6 +26,14 @@ Notes for IDT
 	 appropriately all registers/CPU state is restored to before the interrupt occured. Otherwise your stack
 	 would be incorrect causing potential harmful bugs etc.
 
+- STI : Set Interrupt Flag, this flag sets the IF (interrupt flag) bit in the CPU's EFLAGS register. The CPU accepts
+	hardware interrupts and then when the actual interrupts arrive the CPU proccess them.
+
+	*IMPORTANT*
+	When the kernel boots, interrupts are disabled by default, so we must enable after the IDT and PIC is setup.
+
+- CLI : CLear Interrupt Flag, disables the interrupts and CPU ignores hardware interrupts
+
 2. Design Decisions
  - idt.h : You'll notice there are two structs being defined, IDT and IDT_PTR both of which must be 8 bytes.
 	
