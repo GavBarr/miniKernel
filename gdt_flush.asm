@@ -1,4 +1,3 @@
-
 global gdt_flush
 
 gdt_flush:
@@ -13,4 +12,5 @@ reload_segments:
 	mov fs, ax
 	mov gs, ax
 	mov ss, ax
+
 	ret	

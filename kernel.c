@@ -3,11 +3,16 @@
 #include "idt.h"
 
 void kernel_main(void){
-	char *video_mem = (char *)0xB8000;
+
+
 	gdt_init();
 	idt_init();
 
-	video_mem[0] = 'g';
+	volatile char *video_mem = (volatile char *)0xB8000;
+	video_mem[0] = 'G';
 	video_mem[1] = 0x0F;
+
+
+	while(1);
 
 }

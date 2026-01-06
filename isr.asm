@@ -1,3 +1,5 @@
+global idt_load
+
 extern isr_handler
 
 %macro ISR_NOERRCODE 1
@@ -25,6 +27,7 @@ ISR_ERRCODE 14
 ISR_ERRCODE 17
 ISR_ERRCODE 21
 ISR_ERRCODE 30
+ISR_NOERRCODE 0
 ISR_NOERRCODE 1
 ISR_NOERRCODE 2
 ISR_NOERRCODE 3
@@ -82,6 +85,7 @@ isr_common_stub:
 	call isr_handler
 	add esp, 4 ;cleanup for esp, movingt the pointer up by 4bytes
 
+
 	pop gs
 	pop fs
 	pop es
@@ -94,6 +98,9 @@ isr_common_stub:
 	iret
 
 
-
+idt_load:
+	mov eax, [esp + 4]
+	lidt [eax]
+	ret
 
 

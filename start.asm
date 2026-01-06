@@ -16,11 +16,10 @@ extern kernel_main
 
 section .text
 global _start
-_start: 
+_start:
 	mov esp, top
 	call kernel_main
 	cli
 	hlt
-
-
+ 
 
