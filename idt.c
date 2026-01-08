@@ -1,4 +1,5 @@
 #include "idt.h"
+#include "keyboard.h"
 
 struct idt_ptr i_ptr;
 struct idt_entry idt[256];
@@ -51,6 +52,7 @@ extern void isr44(void);
 extern void isr45(void);
 extern void isr46(void);
 extern void isr47(void);
+
 
 
 void idt_init(void){
@@ -143,6 +145,11 @@ void isr_handler(uint32_t interrupt_number){
 //	v[1] = 0x0F;
 
 
+	if (interrupt_number == 33) {
+        	keyboard_handler();
+    	}
+
+
 
 	if (interrupt_number >= 32 && interrupt_number <= 47){
 		if (interrupt_number >= 40){
@@ -215,4 +222,3 @@ void pic_remap(uint8_t offset1, uint8_t offset2){
 
 
 }
-

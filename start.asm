@@ -18,6 +18,8 @@ section .text
 global _start
 _start:
 	mov esp, top
+	push ebx
+	push eax
 	call kernel_main
 	cli
 	hlt

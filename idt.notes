@@ -36,7 +36,4 @@ Notes for IDT
 
 2. Design Decisions
  - idt.h : You'll notice there are two structs being defined, IDT and IDT_PTR both of which must be 8 bytes.
-	
- - idt.c : 
 
- - isr.asm :
