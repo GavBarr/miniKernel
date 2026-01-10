@@ -20,6 +20,8 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 	mem_alloc_init(mbi, mem_map);
 
+	void *page1 = alloc_page();	
+
 	volatile char *video_mem = (volatile char *)0xB8000;
 	video_mem[0] = 'G';
 	video_mem[1] = 0x0F;
