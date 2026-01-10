@@ -65,8 +65,23 @@ int bitmap_test(struct Bitmap *b, uint32_t bit_index){
 }
 
 uint32_t bitmap_find_free(struct Bitmap *b){
-
 	
+	uint32_t size = b->size / 8;
+
+	for (uint32_t i = 0; i < size; i++){
+		uint8_t byte = b->data[i];
+		if (byte == 0xFF) continue;
+
+		//now loop through each bit, instead of byte
+		for (uint8_t offset = 0; offset < 8; offset ++){
+			if (!(byte & (1 << offset))){
+				return (i * 8) + offset; 
+			}
+		}
+	
+	}	
+		
+	return (uint32_t)-1;
 
 }
 
