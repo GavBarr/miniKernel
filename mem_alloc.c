@@ -17,30 +17,30 @@ static void mark_free_pages(struct mmap_entry *entries, uint32_t total_entries, 
 
 void mem_alloc_init(multiboot_info_t *mbi){
 	copy_mmap(mbi);
-	//print_pointer((void *)mem_map.addr);
 	uint32_t total_entries = get_total_entries();
 	struct mmap_entry entries[total_entries];
 	create_mmap_entries(entries);
 
 	uint64_t highest_addr = find_highest_address(entries, total_entries);
-	//print_pointer((void *)highest_addr);
 
 	uint64_t total_pages = highest_addr / PAGE_SIZE;
-	extern uint32_t kernel_start; //this will be passed through my .asm
-	extern uint32_t kernel_end; //this will be passed through my .asm	
-//	print_pointer((void *)kernel_start);
-//	print_pointer((void *)kernel_end);
+	//ALWAYS declare external symbol references as CHAR, otherwise you can get weird bugs. Convert if needed afterwards
+	extern char kernel_start; //this will be passed through my .asm
+	extern char kernel_end; //this will be passed through my .asm
+	
+	uint32_t start_kernel = (uint32_t)&kernel_start;
+	uint32_t end_kernel = (uint32_t)&kernel_end;
 
-//	print_pointer((void *)kernel_end);
 
-	uint8_t *bitmap_data = (uint8_t *)kernel_end;
+	uint8_t *bitmap_data = (uint8_t *)end_kernel;
 	bitmap_init(&b, bitmap_data, total_pages);
 	//char test[5] = {'t','e','s','t','\0'};
 	//print_string(test);
 
 	mark_free_pages(entries, total_entries, &b);
-	mark_kernel_used_pages(&b, kernel_start, kernel_end);
+	mark_kernel_used_pages(&b, start_kernel, end_kernel);
 	mark_bitmap_used_pages(&b);
+	bitmap_set(&b, 0);
 
 
 
@@ -55,9 +55,7 @@ static void mark_free_pages(struct mmap_entry *entries, uint32_t total_entries, 
 		//doesn't really work for our page structure	
 		uint32_t start_page = entries[entry_index].addr / PAGE_SIZE;
 		uint32_t end_page = (entries[entry_index].addr + entries[entry_index].len) / PAGE_SIZE;
-
-		//print_pointer((void *)start_page);
-		
+			
 		//now loop from the start page to the end page and set bits accordingly
 		for (uint32_t cur_page = start_page; cur_page < end_page; cur_page++){
 			bitmap_clear(b, cur_page);		
@@ -73,8 +71,8 @@ static void mark_kernel_used_pages(struct bitmap *b, uint32_t kernel_start, uint
 	//define where the kernel starts and ends, in relativity to pages, which is why we need to convert using PAGE_SIZE
 	uint32_t start_page = kernel_start / PAGE_SIZE;
 	uint32_t end_page = (kernel_end + PAGE_SIZE - 1) / PAGE_SIZE;//this is
-	//print_pointer((void *)start_page);
-	//print_pointer((void *)end_page);
+	//print_int(end_page);
+	//print_pointer(end_page);
 
 
 	for (uint32_t cur_page = start_page; cur_page < end_page; cur_page++){
@@ -88,10 +86,7 @@ static void mark_bitmap_used_pages(struct bitmap *b){
 	uint32_t bitmap_size_bytes = (b->size + 7) / 8;
         uint32_t start_page = (uint32_t)b->data / PAGE_SIZE;
         uint32_t end_page = (((uint32_t)b->data + bitmap_size_bytes) + PAGE_SIZE - 1) / PAGE_SIZE; 
-
-
-	//print_pointer((void *)start_page);
-	//print_pointer((void *)end_page);
+	
         for (uint32_t cur_page = start_page; cur_page < end_page; cur_page++){
                 bitmap_set(b, cur_page);
 
@@ -103,13 +98,8 @@ void *kmalloc_page(){
 
 
 	uint32_t free_page = bitmap_find_free(&b);
-	print_pointer((void *)free_page);
 
-	char test[] = {'t','e','s','t','\0'};
-	//print_string(test);
 	if (free_page == (uint32_t)-1) return NULL;
-	//print_string(test);
-	print_pointer((void *)free_page);
 	bitmap_set(&b, free_page);
 	uint32_t addr = free_page * PAGE_SIZE;
 
