@@ -19,9 +19,9 @@ struct mmap_entry {
 
 
 void mmap_init(void);
-uint32_t get_total_entries(struct mmap mem_map);
-void create_mmap_entries(struct mmap mem_map, struct mmap_entry mm_entries[]);
-void copy_mmap(multiboot_info_t *mbi, struct mmap mem_map);
+uint32_t get_total_entries();
+void create_mmap_entries(struct mmap_entry mm_entries[]);
+void copy_mmap(multiboot_info_t *mbi);
 void create_mmap_entry(struct mmap_entry entries[],uint32_t index, uint32_t size, uint64_t addr, uint64_t len, uint32_t type);
 uint64_t find_highest_address(struct mmap_entry entries[], uint32_t entry_count);
 

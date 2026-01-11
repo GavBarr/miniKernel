@@ -2,13 +2,15 @@
 #include "multiboot.h"
 #include <stdint.h>
 #include <stddef.h>
+#include "debug.h"
 
+static struct mmap mem_map;
 void mmap_init(void){
 
 
 }
 
-uint32_t get_total_entries(struct mmap mem_map){
+uint32_t get_total_entries(){
 	uint8_t *ptr = (uint8_t *)mem_map.addr;
         uint32_t total_length = mem_map.len;
         uint32_t offset = 0;
@@ -28,8 +30,9 @@ uint32_t get_total_entries(struct mmap mem_map){
 }
 
 
-void create_mmap_entries(struct mmap mem_map, struct mmap_entry mm_entries[]){
+void create_mmap_entries( struct mmap_entry mm_entries[]){
 	uint8_t *ptr = (uint8_t *)mem_map.addr;
+	//print_pointer((void *)ptr);
         uint32_t total_length = mem_map.len;
         uint32_t offset = 0;
         uint32_t arr_size = 0;
@@ -57,8 +60,8 @@ void create_mmap_entries(struct mmap mem_map, struct mmap_entry mm_entries[]){
 
 }
 
-void copy_mmap(multiboot_info_t *mbi, struct mmap mem_map){
-
+void copy_mmap(multiboot_info_t *mbi){
+	//print_pointer((void *)mbi->mmap_addr);
 	mem_map.addr=mbi->mmap_addr;
 	mem_map.len=mbi->mmap_length;
 	
@@ -77,10 +80,10 @@ void create_mmap_entry(struct mmap_entry entries[],uint32_t index, uint32_t size
 
 
 uint64_t find_highest_address(struct mmap_entry entries[], uint32_t entry_count){
-	uint32_t mmap_entry_size = entry_count / sizeof(entries[0]);
-	uint64_t highest_addr;
+	//uint32_t mmap_entry_size = entry_count / sizeof(entries[0]);
+	uint64_t highest_addr = 0;
 
-	for (uint32_t i = 0; i < mmap_entry_size; i++){
+	for (uint32_t i = 0; i < entry_count; i++){
 
 		if (entries[i].type == 1){ //indicates that its usable
 			
