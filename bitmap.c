@@ -8,8 +8,8 @@
 //};
 
 
-int bitmap_init(struct Bitmap *b, uint8_t *bitmap_data, uint32_t size){
-	if (!b || num_bits == 0) return -1;
+int bitmap_init(struct bitmap *b, uint8_t *bitmap_data, uint32_t size){
+	if (!b || size == 0) return -1;
 
         b->data = bitmap_data;
         b->size = size;
@@ -25,7 +25,7 @@ int bitmap_init(struct Bitmap *b, uint8_t *bitmap_data, uint32_t size){
 
 }
 
-int bitmap_set(struct Bitmap *b, uint32_t bit_index){
+int bitmap_set(struct bitmap *b, uint32_t bit_index){
 
 	uint32_t byte_index = bit_index / 8;
         uint8_t bit_offset = bit_index % 8;
@@ -36,7 +36,7 @@ int bitmap_set(struct Bitmap *b, uint32_t bit_index){
 
 }
 
-int bitmap_clear(struct Bitmap *b, uint32_t bit_index){
+int bitmap_clear(struct bitmap *b, uint32_t bit_index){
 
 	uint32_t byte_index = bit_index / 8;
         uint8_t bit_offset = bit_index % 8;
@@ -47,7 +47,7 @@ int bitmap_clear(struct Bitmap *b, uint32_t bit_index){
 	return 0;
 }
 
-int bitmap_test(struct Bitmap *b, uint32_t bit_index){
+int bitmap_test(struct bitmap *b, uint32_t bit_index){
 
 	uint32_t byte_index = bit_index / 8;
         uint8_t bit_offset = bit_index % 8;
@@ -64,7 +64,7 @@ int bitmap_test(struct Bitmap *b, uint32_t bit_index){
 
 }
 
-uint32_t bitmap_find_free(struct Bitmap *b){
+uint32_t bitmap_find_free(struct bitmap *b){
 	
 	uint32_t size = b->size / 8;
 
@@ -86,4 +86,3 @@ uint32_t bitmap_find_free(struct Bitmap *b){
 }
 
 
-#endif

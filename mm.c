@@ -66,12 +66,12 @@ void copy_mmap(multiboot_info_t *mbi, struct mmap mem_map){
 
 void create_mmap_entry(struct mmap_entry entries[],uint32_t index, uint32_t size, uint64_t addr, uint64_t len, uint32_t type){
 		
-	if (entries[index].size == 0){
+	//if (entries[index].size == 0){
 		entries[index].size = size;
 		entries[index].addr = addr;
 		entries[index].len = len;
 		entries[index].type = type;
-	}
+	//}
 }
 
 
