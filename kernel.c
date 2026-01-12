@@ -5,6 +5,7 @@
 #include "multiboot.h"
 #include "mem_alloc.h"
 #include "mm.h"
+#include "paging.h"
 #include "debug.h"
 
 
@@ -14,6 +15,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 //	}
 
 	char string[] = {'G','A','V','I','N','\1','\0'};
+	//print_string(string);
 
 	gdt_init();
 	idt_init();
@@ -22,14 +24,8 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	multiboot_info_t *mbi = (multiboot_info_t *)multiboot_addr;
 	mem_alloc_init(mbi);
 
-
-	void *page1 = kmalloc_page();
-	void *page2 = kmalloc_page();
-	kfree_page(page1);
-	page1 = kmalloc_page();	
-
-
-
+	page_dir_init();
+	
 
 
 	while(1);
