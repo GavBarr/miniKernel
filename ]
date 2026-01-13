@@ -1,9 +1,0 @@
-#include "mem_alloc.h"
-#include "mm.h"
-#include "multiboot.h"
-#include <stdint.h>
-
-void mem_alloc_init(multiboot_info_t *mbi, struct mmap mem_map){
-	mmap_init(mbi, mem_map);
-}
-

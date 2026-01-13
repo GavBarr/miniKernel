@@ -1,7 +1,0 @@
-1. Key Mechanisms
- - GDT : The Global Descriptor Table data structure that is defined in (gdt.h). There are 3 total entries or, rather 
-	 3 GDT entries (an array that gets defined in gdt.c). Each entry is 8bytes anddefines different things. 0 is the Null
-	 Descriptor. 1 is the code segment descriptor. 2 is the data segment descriptor. All define the permissions, limit,
-	 memory segments etc. (more can be seen and explained in gdt.c in the gdt_init() function) 
-
- - GDT_POINTER : Points to the entire table, so then the CPU can look up entries when segments are loaded. 

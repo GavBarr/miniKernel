@@ -1,12 +1,12 @@
 #include <stdint.h>
 #include <stddef.h>
-#include "gdt.h"
-#include "idt.h"
-#include "multiboot.h"
-#include "mem_alloc.h"
-#include "mm.h"
-#include "paging.h"
-#include "debug.h"
+#include "gdt/gdt.h"
+#include "idt/idt.h"
+#include "mem_alloc/multiboot.h"
+#include "mem_alloc/mem_alloc.h"
+#include "mem_alloc/mm.h"
+#include "paging/paging.h"
+#include "debug/debug.h"
 
 
 void kernel_main(uint32_t magic, uint32_t multiboot_addr){
@@ -26,11 +26,11 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 	page_dir_init();
 
-	uint32_t *data = (uint32_t *)0x00500000;
+	uint32_t *data = (uint32_t *)0x00200000;
 	*data = 0xFEEDBEEF;
 
 	print_pointer((void *)data);
-	//print_string("PASSED");
+	print_string("PASSED");
 	
 
 

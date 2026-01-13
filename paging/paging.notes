@@ -1,0 +1,8 @@
+Page Directory (1024 PDEs)
+ ↓
+Page Table (1024 PTEs)
+
+
+- PDE points to a page table
+
+- PTE points to a physical frame
