@@ -5,7 +5,7 @@ The project focuses on understanding how an OS works from the ground up, includi
 
 ---
 
-### 🧠 Project Goals
+### Project Goals
 - Learn x86 kernel development from scratch
 - Gain deeper experience with C and Assembly
 - Understand bootloaders, protected mode, and CPU initialization
@@ -13,7 +13,7 @@ The project focuses on understanding how an OS works from the ground up, includi
 
 ---
 
-### 🖥️ Technical Details
+### Technical Details
 - **Architecture:** x86 (32-bit)
 - **Type:** Monolithic kernel (educational)
 - **Status:** Early development / experimental
@@ -21,7 +21,7 @@ The project focuses on understanding how an OS works from the ground up, includi
 
 ---
 
-### 👤 Author
+### Author
 **Gavin Barrett**
 
 
