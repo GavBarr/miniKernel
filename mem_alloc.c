@@ -40,7 +40,11 @@ void mem_alloc_init(multiboot_info_t *mbi){
 	mark_free_pages(entries, total_entries, &b);
 	mark_kernel_used_pages(&b, start_kernel, end_kernel);
 	mark_bitmap_used_pages(&b);
-	bitmap_set(&b, 0);
+
+	for (uint32_t page = 0; page < 256; page++){
+
+		bitmap_set(&b, page);
+	}
 
 
 

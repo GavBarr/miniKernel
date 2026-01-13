@@ -6,16 +6,10 @@ static volatile char *video_mem = (volatile char *)0xB8000;
 static uint32_t current = 0;
 
 void print_string(char string[]){
-	//uint32_t string_len = 0;
-	//while (string[string_len] != '\1' && string[string_len] != '\0'){
-	//	string_len++;
-	//}
-
-
 	uint32_t index = 0;
 	while (string[index] != '\0'){
-		if (string[index] == '\1'){
-			current += 160;//(160 - string_len);
+		if (string[index] == '\n'){
+			current = (current / 160 + 1) * 160;
 			index++;
 			continue;
 		}		
@@ -37,11 +31,10 @@ void print_pointer(void *ptr){
 	buffer[0] = '0';
 	buffer[1] = 'x';
 
-	for (int i = 7; i >= 0; i--){
-		buffer[2 + (7 - i)] = hex_chars[value & 0xF];
-		value >>= 4;
-	}
-
+	for (int i = 0; i < 8; i++){
+    		buffer[9 - i] = hex_chars[value & 0xF];  // Fill from right to left
+		    value >>= 4;
+	}		
 	buffer[10] = '\0';
 	print_string(buffer);
 	current+=2; //give space in between pointer vals

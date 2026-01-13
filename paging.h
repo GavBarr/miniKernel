@@ -62,5 +62,8 @@ struct page_table{
 
 
 void page_dir_init();
+void enable_paging();
+void load_page_directory(uint32_t page_dir);
+
 
 #endif

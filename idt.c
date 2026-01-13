@@ -1,5 +1,6 @@
 #include "idt.h"
 #include "keyboard.h"
+#include "debug.h"
 
 struct idt_ptr i_ptr;
 struct idt_entry idt[256];
@@ -143,11 +144,21 @@ void isr_handler(uint32_t interrupt_number){
 //	volatile char *v = (volatile char *)0xB8000;
 //	v[2] = 'I';
 //	v[1] = 0x0F;
+	
 
+	if (interrupt_number == 14){
+		uint32_t fault_addr;
+		__asm__ volatile("mov %%cr2, %0" : "=r"(fault_addr));
+		print_string("---PAGE FAULT---\n\0");
+		print_pointer((void *)fault_addr);
 
-	if (interrupt_number == 33) {
-        	keyboard_handler();
-    	}
+		while(1){
+
+			__asm__ volatile("hlt");
+		}
+	}if (interrupt_number == 33) {
+                keyboard_handler();
+        }
 
 
 

@@ -54,9 +54,27 @@ void page_dir_init(){
 		kernel_pt->entries[entry].available = 0;
 		kernel_pt->entries[entry].frame = physical_addr >> 12;
 	}
+
+	//print_pointer(pd);
+	//print_pointer(kernel_pt);
+
+	//we MUST load the pd first into cr3 before enabling paging, or else the CPU will try and do transalations
+	//before the cr3 register has any values and it will crash
+	load_page_directory((uint32_t)pd);
+	enable_paging();
 }
 
 
+void enable_paging(){
+	uint32_t cr0;
+	__asm__ volatile ("mov %%cr0, %0" : "=r"(cr0));
+	cr0 |= 0x80000000; //we are setting bit 31, which in the cr0 register it is a flag for enabling paging
+	__asm__ volatile ("mov %0, %%cr0" : : "r"(cr0));
+}
+
+void load_page_directory(uint32_t page_dir){
+	__asm__ volatile ("mov %0, %%cr3" : : "r"(page_dir));
+}
 
 
 

@@ -25,6 +25,12 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	mem_alloc_init(mbi);
 
 	page_dir_init();
+
+	uint32_t *data = (uint32_t *)0x00500000;
+	*data = 0xFEEDBEEF;
+
+	print_pointer((void *)data);
+	//print_string("PASSED");
 	
 
 
