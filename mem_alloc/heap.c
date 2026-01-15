@@ -13,6 +13,7 @@
 //};
 static void *find_free_block(uint32_t size);
 static void split_block(struct block_header *block, uint32_t size);
+static void coalescence_adjacent_block(struct block_header *block);
 
 static void *heap_start;
 static void *heap_end;
@@ -53,7 +54,37 @@ void *kmalloc(uint32_t size){
 	block->free_flag = 0; //used block now
 	return block;
 }
-void kfree(void *addr);
+void kfree(void *block_ptr){
+
+	struct block_header *block = (struct block_header *)block_ptr;
+	block->free_flag = 1;
+	coalescence_adjacent_block(block);
+}
+
+static void coalescence_adjacent_block(struct block_header *block){
+
+	void *next = (void *)((uint32_t)block + sizeof(struct block_header) + block->size);
+	struct block_header *next_block = (struct block_header *)next;
+	
+	if (next_block->free_flag == 1 && next_block->magic == 0xDEADBEEF){
+		//combine current and next block if possible
+		if (debug == 1){
+			print_string("\n\0");
+        	        print_string("-----BLOCK SIZE BEFORE COMBINING-----\n\0");
+                	print_int((uint32_t)block->size);
+		}
+
+		block->size+=next_block->size;
+
+		if (debug == 1){
+			print_string("\n\0");
+			print_string("-----BLOCK SIZE AFTER COMBINING-----\n\0");
+			print_int((uint32_t)block->size);
+		}
+	}
+	
+}
+
 static void *find_free_block(uint32_t size){
 	if (size > HEAP_SIZE) return NULL;
 	struct block_header *current_block = first_block;

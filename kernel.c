@@ -16,7 +16,6 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 //		panic("Not booted by GRUB");
 //	}
 
-	print_string("GOOSEOS:\n\0");
 
 	gdt_init();
 	idt_init();
@@ -28,7 +27,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	page_dir_init();
 	heap_init();
 	if (debug == 1){
-		void *ptr = kmalloc(10);
+		void *ptr = kmalloc(20);
 		struct block_header *block = (struct block_header *)ptr;
 		print_string("\n\0");
 		print_string("block_addr -> \0");
@@ -43,9 +42,9 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	        print_string("block_addr.magic -> \0");
 	        print_pointer((void *)block->magic);
 		print_string("\n\0");
-		print_string("\n\0");
-		print_string("-------------------------------\n\0");
-		void *ptr2 = kmalloc(10);
+		kfree(ptr);
+
+		void *ptr2 = kmalloc(20);
                 struct block_header *block2 = (struct block_header *)ptr2;
                 print_string("\n\0");
                 print_string("block_addr -> \0");
@@ -59,6 +58,10 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
                 print_string("\n\0");
                 print_string("block_addr.magic -> \0");
                 print_pointer((void *)block2->magic);
+                print_string("\n\0");
+
+
+
 	}
 
 
