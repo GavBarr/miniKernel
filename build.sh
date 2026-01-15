@@ -17,6 +17,7 @@ gcc $CFLAGS -c keyboard.c   -o keyboard.o
 gcc $CFLAGS -c mem_alloc/mm.c         -o mem_alloc/mm.o
 gcc $CFLAGS -c mem_alloc/mem_alloc.c  -o mem_alloc/mem_alloc.o
 gcc $CFLAGS -c mem_alloc/bitmap.c     -o mem_alloc/bitmap.o
+gcc $CFLAGS -c mem_alloc/heap.c     -o mem_alloc/heap.o
 gcc $CFLAGS -c paging/paging.c     -o paging/paging.o
 gcc $CFLAGS -c debug/debug.c      -o debug/debug.o
 
@@ -24,7 +25,7 @@ echo "Linking..."
 ld -m elf_i386 -T linker.ld \
   -o kernel.bin \
   start.o kernel.o gdt/gdt.o gdt/gdt_flush.o idt/idt.o idt/isr_stubs.o \
-  keyboard.o mem_alloc/mm.o mem_alloc/mem_alloc.o mem_alloc/bitmap.o paging/paging.o debug/debug.o
+  keyboard.o mem_alloc/mm.o mem_alloc/mem_alloc.o mem_alloc/bitmap.o mem_alloc/heap.o paging/paging.o debug/debug.o
 
 echo "CreatingISO..."
 cp kernel.bin iso/boot/
