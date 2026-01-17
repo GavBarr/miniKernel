@@ -46,17 +46,53 @@ void heap_init(){
                 print_pointer((void *)first_block->magic);
 	}
 }
+
+void *get_heap_start(){
+
+	return heap_start;
+}
+
+
 void *kmalloc(uint32_t size){
 	struct block_header *block = find_free_block(size);
 	if (block == NULL) return NULL;
 	split_block(block, size);
 
 	block->free_flag = 0; //used block now
-	return block;
+	//print_string("\n\0");
+	//print_string("\n\0");
+	//print_string("\n\0");
+	//print_string("\n\0");
+	//print_string("\n\0");
+	//print_string("\n\0");
+	//print_string("\n\0");
+	//print_string("\n\0");
+	//print_string("KMALLOC BLOCK: \0");
+        //print_pointer(block);
+	//print_string("\n\0");
+	//print_string("SIZE: \0");
+	//print_int(size);
+	//print_string("\n\0");
+	//print_string("------------------\n\0");
+	
+	return (void *)(block + 1);
 }
 void kfree(void *block_ptr){
+	if (block_ptr < heap_start || block_ptr >= heap_end) {
+		print_string("\n\0");
+		print_string("\n\0");
+		print_string("\n\0");
+		print_string("\n\0");
+		print_string("\n\0");
+	        print_string("ERROR: kfree() - pointer outside heap!\n\0");
+	        print_string("Pointer: \0");
+        	print_pointer(block_ptr);
+     	   	print_string("\n\0");
+        	while(1);  // Halt
+    	}
 
-	struct block_header *block = (struct block_header *)block_ptr;
+
+	struct block_header *block = (struct block_header *)block_ptr - 1;
 	block->free_flag = 1;
 	coalescence_adjacent_block(block);
 }
@@ -128,7 +164,29 @@ static void split_block(struct block_header *block, uint32_t size){
 	}
 }
 
+void walk_and_print_heap(){
+	struct block_header *current_block = first_block;
 
+	while ((void *)current_block<heap_end){
+                if (current_block->magic != 0xDEADBEEF) print_string("CORRUPTION\0");
+                
+		print_string("---------------------\n\0");
+                print_string("new_block_addr.addr -> \0");
+                print_pointer(current_block);
+                print_string("\n\0");
+                print_string("new_block_addr.size -> \0");
+                print_int((uint32_t)current_block->size);
+                print_string("\n\0");
+                print_string("new_block_addr.free_flag -> \0");
+                print_int((uint32_t)current_block->free_flag);
+                print_string("\n\0");
+                print_string("new_block_addr.magic -> \0");
+                print_pointer((void *)current_block->magic);
+
+		void *next_addr = (void *)((uint32_t)current_block+sizeof(struct block_header)+(current_block->size));
+                current_block = (struct block_header *)next_addr;
+        }
+}
 static struct block_header get_block_header(void *ptr);
 
 

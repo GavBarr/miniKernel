@@ -30,7 +30,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 	shell_run();
 	if (debug == 1){
-		void *ptr = kmalloc(20);
+		void *ptr = kmalloc(5);
 		struct block_header *block = (struct block_header *)ptr;
 		print_string("\n\0");
 		print_string("block_addr -> \0");
@@ -47,7 +47,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 		print_string("\n\0");
 		
 
-		void *ptr2 = kmalloc(20);
+		void *ptr2 = kmalloc(4);
                 struct block_header *block2 = (struct block_header *)ptr2;
                 print_string("\n\0");
                 print_string("block_addr -> \0");
@@ -63,7 +63,8 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
                 print_pointer((void *)block2->magic);
                 print_string("\n\0");
 
-
+		kfree(ptr);
+		kfree(ptr2);
 
 	}
 

@@ -12,6 +12,8 @@ struct block_header{
 void heap_init();
 void *kmalloc(uint32_t size);
 void kfree(void *addr);
+void walk_and_print_heap();
+void *get_heap_start();
 
 
 
