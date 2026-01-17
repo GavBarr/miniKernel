@@ -1,5 +1,5 @@
 #include "debug.h"
-#define TEXT_COLOR 0x0A
+#define TEXT_COLOR 0x0B
 #include <stdint.h>
 
 static volatile char *video_mem = (volatile char *)0xB8000;

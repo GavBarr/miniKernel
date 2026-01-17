@@ -1,5 +1,5 @@
 #include "idt.h"
-#include "../keyboard.h"
+#include "../drivers/keyboard.h"
 #include "../debug/debug.h"
 
 struct idt_ptr i_ptr;

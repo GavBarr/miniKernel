@@ -1,7 +1,7 @@
 #include "gdt.h"
 
 struct gdt_ptr g_ptr;
-struct gdt_entry gdt[3];
+struct gdt_entry gdt[5];
 //0 - Null Descriptor
 //1 - Kernel code segment descriptor
 //2 - Kernel data segment descriptor
@@ -11,6 +11,9 @@ void gdt_init(void){
 	//dont need to do this for [0] because it should all be NULL or rather 0
 	gdt_add_entry(1, 0, 0xFFFFF, 0x9A, 0xCF);
 	gdt_add_entry(2, 0, 0xFFFFF, 0x92, 0xCF);
+	gdt_add_entry(3, 0, 0xFFFFF, 0xFA, 0xCF);
+	gdt_add_entry(4, 0, 0xFFFFF, 0xF2, 0xCF);
+	
 
 	g_ptr.limit = sizeof(gdt) -1;
 	g_ptr.base = (uint32_t)&gdt;

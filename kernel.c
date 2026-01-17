@@ -8,8 +8,9 @@
 #include "mem_alloc/mm.h"
 #include "paging/paging.h"
 #include "debug/debug.h"
+#include "kernel_shell/shell.h"
 
-static uint32_t debug = 1;
+static uint32_t debug = 0;
 
 void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 //	if (magic != 0x2BADB002){
@@ -26,6 +27,8 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 	page_dir_init();
 	heap_init();
+
+	shell_run();
 	if (debug == 1){
 		void *ptr = kmalloc(20);
 		struct block_header *block = (struct block_header *)ptr;
@@ -42,7 +45,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	        print_string("block_addr.magic -> \0");
 	        print_pointer((void *)block->magic);
 		print_string("\n\0");
-		kfree(ptr);
+		
 
 		void *ptr2 = kmalloc(20);
                 struct block_header *block2 = (struct block_header *)ptr2;
@@ -68,6 +71,8 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	
 
 
-	while(1);
+	while(1){
+		
+	};
 
 }
