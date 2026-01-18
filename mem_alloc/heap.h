@@ -14,6 +14,7 @@ void *kmalloc(uint32_t size);
 void kfree(void *addr);
 void walk_and_print_heap();
 void *get_heap_start();
+void *get_heap_end();
 
 
 

@@ -27,44 +27,15 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 	page_dir_init();
 	heap_init();
-
+	
+//	walk_and_print_heap();
 	shell_run();
 	if (debug == 1){
 		void *ptr = kmalloc(5);
-		struct block_header *block = (struct block_header *)ptr;
-		print_string("\n\0");
-		print_string("block_addr -> \0");
-		print_pointer(ptr);
-		print_string("\n\0");
-		print_string("block_addr.size -> \0");
-		print_int((uint32_t)block->size);
-		print_string("\n\0");
-	        print_string("block_addr.free_flag -> \0");
-	        print_int((uint32_t)block->free_flag);
-		print_string("\n\0");
-	        print_string("block_addr.magic -> \0");
-	        print_pointer((void *)block->magic);
-		print_string("\n\0");
-		
-
-		void *ptr2 = kmalloc(4);
-                struct block_header *block2 = (struct block_header *)ptr2;
-                print_string("\n\0");
-                print_string("block_addr -> \0");
-                print_pointer(ptr2);
-                print_string("\n\0");
-                print_string("block_addr.size -> \0");
-                print_int((uint32_t)block2->size);
-                print_string("\n\0");
-                print_string("block_addr.free_flag -> \0");
-                print_int((uint32_t)block2->free_flag);
-                print_string("\n\0");
-                print_string("block_addr.magic -> \0");
-                print_pointer((void *)block2->magic);
-                print_string("\n\0");
-
+		void *ptr2 = kmalloc(5);
 		kfree(ptr);
 		kfree(ptr2);
+		walk_and_print_heap();		
 
 	}
 

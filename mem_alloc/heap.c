@@ -52,6 +52,11 @@ void *get_heap_start(){
 	return heap_start;
 }
 
+void *get_heap_end(){
+
+        return heap_end;
+}
+
 
 void *kmalloc(uint32_t size){
 	struct block_header *block = find_free_block(size);
@@ -78,7 +83,12 @@ void *kmalloc(uint32_t size){
 	return (void *)(block + 1);
 }
 void kfree(void *block_ptr){
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
 	if (block_ptr < heap_start || block_ptr >= heap_end) {
+	//irint_pointer(block_ptr);
 		print_string("\n\0");
 		print_string("\n\0");
 		print_string("\n\0");
@@ -110,7 +120,7 @@ static void coalescence_adjacent_block(struct block_header *block){
                 	print_int((uint32_t)block->size);
 		}
 
-		block->size+=next_block->size;
+		block->size += sizeof(struct block_header)+next_block->size;
 
 		if (debug == 1){
 			print_string("\n\0");
