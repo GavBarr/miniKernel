@@ -9,8 +9,8 @@
 #include <stddef.h>
 #define PROMPT_COLOR 0x0B
 
-static uint32_t cursor_pos = 6;
-static uint32_t row = 1;
+static uint32_t row = 3;
+static uint32_t cursor_pos = 326;
 volatile char *video_cursor = (volatile char *)0xB8000;
 static void print_prompt();
 static void print_command_err();
@@ -47,12 +47,16 @@ void display_character(char character){
 				print_echo_arg(arg);
                         }
 			if (arg) kfree(arg);
+			kfree(command);
 		}else if(strcompare(command, "clear\n")){
+			kfree(command);
 			clear_screen();
 			row=0;
 		}else if(strcompare(command, "heap-start")){
+			kfree(command);
 			print_heap();
 		}else if(strcompare(command, "heap-total")){
+			kfree(command);
                         print_total_heap();
                 }else if(strcompare(command, "kmalloc\0")){
 			uint32_t len = 8;
@@ -61,15 +65,17 @@ void display_character(char character){
                                 malloc_and_print(arg);
                         }
                         if (arg) kfree(arg);
+			kfree(command);
 
 			
 		}else{
+			kfree(command);
 			print_command_err();
 		}
 		
 		clear_keyboard_buffer();
 		print_prompt();
-		kfree(command);
+		//kfree(command);
 		//walk_and_print_heap();
 		return;	
 	}
@@ -150,7 +156,7 @@ static void print_total_heap(){
 	while (current < end){
 		struct block_header *block = (struct block_header *)current;
 	        char *addr = convert_pointer_to_char_arr(current);
-		if (block->magic == 0xDEADBEEF && block->size != 0){
+		if (block->size != 0){
 		       temp_cursor_pos = display_vga_text("address->", 9, temp_cursor_pos);
 		       temp_cursor_pos = display_vga_text(addr, 10, temp_cursor_pos);
 	               if (block->free_flag != 1) temp_cursor_pos = display_vga_text(" X ", 2, temp_cursor_pos);
@@ -291,7 +297,7 @@ static void malloc_and_print(char *size){
 	if (converted_size == 0) return;
 	void *addr = kmalloc(converted_size);
 	uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
-	temp_cursor_pos = display_vga_text((char *)addr, 10, temp_cursor_pos);
+	temp_cursor_pos = display_vga_text("ALLOCATED!", 10, temp_cursor_pos);
 }
 
 
