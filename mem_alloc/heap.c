@@ -3,7 +3,7 @@
 #include "mem_alloc.h"
 #include <stdint.h>
 #include <stddef.h>
-#define HEAP_SIZE 65536 //64kb
+#define HEAP_SIZE 1048576 //1MB
 #define PAGE_SIZE 4 //4kb
 #define MINIMUM_BLOCK_SIZE 16 //16kb		
 //struct block_header{

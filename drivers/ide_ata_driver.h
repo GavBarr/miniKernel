@@ -25,7 +25,9 @@ struct ide_channel{
 };
 
 void ide_init();
-
+void ide_read_block();
+void ide_primary_irq_handler();
+void ide_secondary_irq_handler();
 
 #endif
 

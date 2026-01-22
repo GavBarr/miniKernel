@@ -1,5 +1,6 @@
 #include "idt.h"
 #include "../drivers/keyboard.h"
+#include "../drivers/ide_ata_driver.h"
 #include "../debug/debug.h"
 
 struct idt_ptr i_ptr;
@@ -54,6 +55,9 @@ extern void isr45(void);
 extern void isr46(void);
 extern void isr47(void);
 
+
+static void ide_primary_irq_handler();
+static void ide_secondary_irq_handler();
 
 
 void idt_init(void){
@@ -159,7 +163,13 @@ void isr_handler(uint32_t interrupt_number){
 	}if (interrupt_number == 33) {
                 keyboard_handler();
         }
-
+	
+	if (interrupt_number == 46) {
+                ide_primary_irq_handler();
+        }
+        if (interrupt_number == 47) {
+                ide_secondary_irq_handler();
+        }
 
 
 	if (interrupt_number >= 32 && interrupt_number <= 47){
@@ -173,6 +183,7 @@ void isr_handler(uint32_t interrupt_number){
 
 
 }
+
 
 static inline void outb(uint16_t port, uint8_t value){
 	//porting I/O

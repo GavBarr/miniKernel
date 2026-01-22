@@ -1,7 +1,10 @@
 #include <stdint.h>
 #include <stddef.h>
+#include "drivers/ramdisk.h"
 #include "gdt/gdt.h"
 #include "idt/idt.h"
+#include "include/device_manager.h"
+#include "include/block_device.h"
 #include "mem_alloc/heap.h"
 #include "mem_alloc/multiboot.h"
 #include "mem_alloc/mem_alloc.h"
@@ -27,21 +30,23 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 	page_dir_init();
 	heap_init();
+	device_manager_init();
+	struct block_device *dev = ramdisk_init();
+	int check = register_block_device(dev);
 	
-//	walk_and_print_heap();
+	uint8_t *buffer = kmalloc(512);
+	for (int i = 0; i < dev->block_size; i++) buffer[i]=1;
+	
+	dev->ops->write_block(dev, 0 , buffer);
+
+	uint8_t *buffer2 = kmalloc(512);
+	dev->ops->read_block(dev, 0, buffer2);
+
+//	for (int i = 0; i < dev->block_size; i++) print_int(buffer2[i]);
+
+	kfree(buffer);
+	kfree(buffer2);
 	shell_run();
-	if (debug == 1){
-		void *ptr = kmalloc(5);
-		void *ptr2 = kmalloc(5);
-		kfree(ptr);
-		kfree(ptr2);
-		walk_and_print_heap();		
-
-	}
-
-
-	
-
 
 	while(1){
 		
