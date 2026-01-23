@@ -1,23 +1,29 @@
 #include "ide_ata_driver.h"
+#include "../debug/debug.h"
 #include "../include/block_device.h"
 #include "../mem_alloc/heap.h"
 #include <stddef.h>
 #include <stdint.h>
 
 static inline void outb(uint16_t port, uint8_t value);
-static inline void outw(uint16_t port, uint8_t value);
+static inline void outw(uint16_t port, uint16_t value);
 static inline uint8_t inb(uint16_t port);
-static inline uint8_t inw(uint16_t port);
+static inline uint16_t inw(uint16_t port);
 static inline void io_wait();
 static void probe_channels();
+static void enable_interrupts();
+static void disable_interrupts();
+
 //max possible drives
-static struct ide_device ide_dev[4];
+static struct ide_device *ide_dev;//when we allocated we declare enough space
 //primary and secondory
-static struct ide_channel ide_chan[2];
+static struct ide_channel *ide_chan;//when we allocated we declare enough space
 
 static struct block_device_ops ops = {
         .read_block = ide_read_block,
-        .write_block = ide_write_block
+        .write_block = ide_write_block,
+	.flush = ide_flush,
+	.destroy = ide_destroy
 };
 
 
@@ -51,17 +57,71 @@ struct block_device *ide_init(){
         disk->ops = &ops;
         disk->data = (void *)0;
 
+
+	//print_int(ide_dev[1].exists);
+
         return disk;
 
 
 }
 
-int ide_write_block(uint8_t device, uint32_t lba, uint16_t sector_count, uint8_t *buffer){
+int ide_flush(struct block_device *dev){
+	uint32_t device = (uint32_t)dev->data;
+        uint8_t channel = ide_dev[device].channel;
+        uint8_t drive = ide_dev[device].drive;
+        uint16_t base = ide_chan[channel].base_io_port;
+
+        uint16_t sector_count = 1;//TODO for multiple sector writes
+
+
+        uint8_t drive_type;
+        if (drive == 0){
+                drive_type = 0xE0;
+        }else{
+                drive_type = 0XF0;
+        }
+
+        //select the drive
+        outb(base + 6, drive_type); //selected the drive with the bits set correctly
+
+        while (inb(base + 7) & 0x80);
+	outb(base + 7, 0xE7); //issue FLUSH command
+        while (inb(base + 7) & 0x80);
+
+        uint8_t status = inb(base + 7);
+        if (status & 0x01){
+                return -1;
+        }
+	return 0;
+	
+}
+
+int ide_destroy(struct block_device *dev){
+
+	//avoid compiler warnings of not using *dev
+	(void)dev;
+	if(ide_dev){
+		kfree(ide_dev);
+		ide_dev = NULL;
+
+	}
+	if(ide_chan){
+		kfree(ide_chan);
+		ide_chan = NULL;
+	}
+
+	return 0;
+
+}
+
+int ide_write_block(struct block_device *dev, uint32_t lba, void *buffer){
+	uint32_t device = (uint32_t)dev->data;
 	uint8_t channel = ide_dev[device].channel;
 	uint8_t drive = ide_dev[device].drive;
 	uint16_t base = ide_chan[channel].base_io_port;
+	
+	uint16_t sector_count = 1;//TODO for multiple sector writes
 
-	while (inb(base + 7) & 0x80);
 
 	uint8_t drive_type;
 	if (drive == 0){
@@ -74,6 +134,7 @@ int ide_write_block(uint8_t device, uint32_t lba, uint16_t sector_count, uint8_t
 	uint8_t lba_upper = (lba >> 24) & 0x0F;
 	drive_type = drive_type | lba_upper; //OR the mask on the the drive type
 	outb(base + 6, drive_type); //selected the drive with the bits set correctly
+	
 	while (inb(base + 7) & 0x80);
 
 	outb(base + 2, sector_count);
@@ -117,7 +178,8 @@ int ide_write_block(uint8_t device, uint32_t lba, uint16_t sector_count, uint8_t
 
 
 
-int ide_read_block(uint8_t device, uint32_t lba, uint8_t *buffer){
+int ide_read_block(struct block_device *dev, uint32_t lba, void *buffer){
+	uint32_t device = (uint32_t)dev->data;
 	uint8_t channel = ide_dev[device].channel;
 	uint16_t base = ide_chan[channel].base_io_port;
 	uint8_t driver = ide_dev[device].drive;
@@ -271,9 +333,11 @@ static void probe_channels(){
 			outb(command, 0xEC);//send out IDENTIFY command
 			while(inb(status) & 0x80);
 			uint8_t s = inb(base + 7);
-			if (s == 0x00 || s == 0xFF) continue;
+			if ((s == 0x00) || (s == 0xFF)) continue;
 			if (s & 0x01) continue; //if ERR is set, then it failed
-			while(!(inb(base + 7) & 0x08)); //if the DRQ is set to 0, meaning that the data isn't ready, just wait and loop
+			io_wait();
+
+			while(((inb(base + 7) & 0x80)) || !(s & 0x08)); //if the DRQ is set to 0, meaning that the data isn't ready, just wait and loop
 			uint16_t identify_data[256];
 			for (int i = 0; i < 256; i++){
 				identify_data[i] = inw(base + 0); //trying to be explicit with base
@@ -341,7 +405,7 @@ static inline void outb(uint16_t port, uint8_t value){
 
 }
 
-static inline void outw(uint16_t port, uint8_t value){
+static inline void outw(uint16_t port, uint16_t value){
         //porting I/O
 
         //assembly instructions ot put value into AL register and put port into DX register
@@ -364,8 +428,8 @@ static inline uint8_t inb(uint16_t port){
         return return_val;
 }
 
-static inline uint8_t inw(uint16_t port){
-        uint8_t return_val;
+static inline uint16_t inw(uint16_t port){
+        uint16_t return_val;
 
         __asm__ volatile ("inw %1, %0"
                          : "=a"(return_val)

@@ -13,6 +13,7 @@ struct device_manager{
 
 int device_manager_init();
 int register_block_device(struct block_device *device);
+int unregister_block_device(struct block_device *device);
 struct block_device *find_device(char *name);
 
 #endif

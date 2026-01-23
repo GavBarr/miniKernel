@@ -32,20 +32,61 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	page_dir_init();
 	heap_init();
 	device_manager_init();
+
 	struct block_device *dev = ide_init();
 	int check = register_block_device(dev);
+	if (debug){
+		uint8_t *buffer = kmalloc(512);
+		print_string(dev->name);
+		print_string("\n\0");
+		for (int i = 0; i < dev->block_size; i++) buffer[i]=1;
 	
-//	uint8_t *buffer = kmalloc(512);
-//	for (int i = 0; i < dev->block_size; i++) buffer[i]=1;
+		int status = dev->ops->write_block(dev, 2 , buffer);
+		status = dev->ops->write_block(dev, 3 , buffer);
+		status = dev->ops->write_block(dev, 4 , buffer);
+		status = dev->ops->write_block(dev, 500 , buffer);
+
+		if (status != 0){
+			print_string("FAILED WRITE\n\0");
+		}else{
+			print_string("SUCCESSFUL WRITE\n\0");
+		}
+		uint8_t *buffer2 = kmalloc(512);
+
+
+		int status2 = dev->ops->read_block(dev, 500, buffer2);
+		if (status2 != 0){
+			print_string("FAILED WRITE\n\0");
+		}else{
+			print_string("SUCCESSFUL READ\n\0");
+		}
 	
-//	dev->ops->write_block(dev, 0 , buffer);
+		for (int i = 0; i < dev->block_size; i++){
+			if(buffer2[i] == 1){
+				//expected value of 1 == success
+				print_string("1 \0");
+				//break;
+			}else{
+				print_string("UNVERIFIED DATA\n\0");
+				break;
+			}
+		}
+		
 
-//	uint8_t *buffer2 = kmalloc(512);
-//	dev->ops->read_block(dev, 0, buffer2);
+		int status3 = dev->ops->flush(dev);
+		print_string("\n\0");
 
 
-//	kfree(buffer);
-//	kfree(buffer2);
+		if(status3 == -1){
+			print_string("****FLUSH DEVICE FAIL****\n\0");
+		}else{
+			print_string("****FLUSH DEVICE SUCCESS****");
+		}
+
+		kfree(buffer);
+		kfree(buffer2);
+	}
+
 	shell_run();
 
 	while(1){

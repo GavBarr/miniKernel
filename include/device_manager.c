@@ -1,5 +1,6 @@
 #include "device_manager.h"
 #include "strcompare.h"
+#include "../debug/debug.h"
 #include "../mem_alloc/heap.h"
 #include <stddef.h>
 #include <stdint.h>
@@ -42,6 +43,30 @@ int register_block_device(struct block_device *device){
 
 }
 
+int unregister_block_device(struct block_device *device){
+        if (manager->initialized != 1) return -1;
+        if (device == NULL) return -1;
+        if (device->block_size == 0) return -1;
+	
+	print_string("\n\0");
+	int device_index = -1;
+	for (uint32_t i = 0; i < MAX_NUMBER_OF_DEVICES; i++){
+                if (manager->devices[i] == NULL) continue;
+		if (manager->devices[i]->name == NULL) continue;
+		if (strcompare(manager->devices[i]->name, device->name) == 1){
+			device_index = i;
+			break;
+		}
+        }
+
+
+	if (device_index == -1) return -1;
+        manager->devices[device_index] = NULL;
+        manager->count--;
+
+        return 0;
+
+}
 
 
 struct block_device *find_device(char *name){
