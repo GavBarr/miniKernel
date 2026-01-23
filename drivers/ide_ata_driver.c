@@ -1,33 +1,42 @@
 #include "ide_ata_driver.h"
+#include "../include/block_device.h"
 #include "../mem_alloc/heap.h"
 #include <stddef.h>
 #include <stdint.h>
 
 static inline void outb(uint16_t port, uint8_t value);
+static inline void outw(uint16_t port, uint8_t value);
 static inline uint8_t inb(uint16_t port);
 static inline uint8_t inw(uint16_t port);
+static inline void io_wait();
 static void probe_channels();
 //max possible drives
-static struct ide_device *ide_dev[4];
+static struct ide_device ide_dev[4];
 //primary and secondory
-static struct ide_channel *ide_chan[2];
+static struct ide_channel ide_chan[2];
 
-void ide_init(){
+static struct block_device_ops ops = {
+        .read_block = ide_read_block,
+        .write_block = ide_write_block
+};
+
+
+struct block_device *ide_init(){
 	ide_dev = kmalloc(sizeof(struct ide_device) * 4);
 	ide_chan = kmalloc(sizeof(struct ide_channel) * 2);
-	if (ide_dev == NULL || ide_chan == NULL) return;
+	if (ide_dev == NULL || ide_chan == NULL) return NULL;
 
 	//primary
-	ide_chan[0]->base_io_port = 0x1F0;
-	ide_chan[0]->control_port = 0x3F6;
-	ide_chan[0]->irq = 14;
-	ide_chan[0]->int_enable_state = 0;
+	ide_chan[0].base_io_port = 0x1F0;
+	ide_chan[0].control_port = 0x3F6;
+	ide_chan[0].irq = 14;
+	ide_chan[0].int_enable_state = 0;
 	
 	//secondary
-	ide_chan[1]->base_io_port = 0x170;
-        ide_chan[1]->control_port = 0x376;
-        ide_chan[1]->irq = 15;
-        ide_chan[1]->int_enable_state = 0;
+	ide_chan[1].base_io_port = 0x170;
+        ide_chan[1].control_port = 0x376;
+        ide_chan[1].irq = 15;
+        ide_chan[1].int_enable_state = 0;
 	
 
 	disable_interrupts();
@@ -35,14 +44,83 @@ void ide_init(){
 	enable_interrupts();
 
 
+	struct block_device *disk = kmalloc(sizeof(struct block_device));
+	disk->name = "disk0";
+        disk->block_size = 512;
+        disk->block_count = ide_dev[0].size;
+        disk->ops = &ops;
+        disk->data = (void *)0;
+
+        return disk;
 
 
 }
 
-void ide_read_block(uint8_t device, uint32_t lba, uint8_t *buffer){
-	uint8_t channel = ide_dev[device]->channel;
-	uint16_t base = ide_chan[channel]->base_io_port;
-	uint8_t driver = ide_dev[device]->drive;
+int ide_write_block(uint8_t device, uint32_t lba, uint16_t sector_count, uint8_t *buffer){
+	uint8_t channel = ide_dev[device].channel;
+	uint8_t drive = ide_dev[device].drive;
+	uint16_t base = ide_chan[channel].base_io_port;
+
+	while (inb(base + 7) & 0x80);
+
+	uint8_t drive_type;
+	if (drive == 0){
+		drive_type = 0xE0;
+	}else{
+		drive_type = 0XF0;
+	}
+
+	//select the drive
+	uint8_t lba_upper = (lba >> 24) & 0x0F;
+	drive_type = drive_type | lba_upper; //OR the mask on the the drive type
+	outb(base + 6, drive_type); //selected the drive with the bits set correctly
+	while (inb(base + 7) & 0x80);
+
+	outb(base + 2, sector_count);
+
+	uint8_t lba_low = lba & 0xFF;
+	outb(base + 3, lba_low);
+
+	uint8_t lba_mid = (lba >> 8) & 0xFF; //shift over and only grab the mid bits using >> 8
+	outb(base + 4, lba_mid);
+	
+	uint8_t lba_high = (lba >> 16) & 0xFF;
+	outb(base + 5, lba_high);
+
+	while (inb(base + 7) & 0x80);
+	outb(base + 7, 0x30);//WRITE SECTORS command
+	while (inb(base + 7) & 0x80);
+
+	uint8_t status = inb(base + 7);
+	if (status & 0x01){
+		return -1;
+	}
+
+	for (int sector = 0; sector < sector_count; sector++){
+		while(!(inb(base + 7) & 0x08)); //wait until DRQ is ready
+		uint16_t *buf = (uint16_t *)(buffer + (sector * 512));	
+		//write the buffer contents to base + 0, the data port
+		for (int i = 0; i < 256; i++){
+			outw(base + 0, buf[i]);
+	
+		}
+	}
+	while (inb(base + 7) & 0x80);
+
+	outb(base + 7, 0xE7); //FLUSH command
+	while (inb(base + 7) & 0x80);
+
+	return 0;
+}
+
+
+
+
+
+int ide_read_block(uint8_t device, uint32_t lba, uint8_t *buffer){
+	uint8_t channel = ide_dev[device].channel;
+	uint16_t base = ide_chan[channel].base_io_port;
+	uint8_t driver = ide_dev[device].drive;
 
 	//wait until driver is not busy
 	while (inb(base + 7) & 0x80);
@@ -87,7 +165,7 @@ void ide_read_block(uint8_t device, uint32_t lba, uint8_t *buffer){
 	uint8_t status = inb(base + 7);
 
 	//error
-	if (stats == 0x01){
+	if (status == 0x01){
 		return -1;
 	}
 	//device fault
@@ -107,8 +185,10 @@ void ide_read_block(uint8_t device, uint32_t lba, uint8_t *buffer){
 
 }
 
+
+
 void ide_primary_irq_handler(){
-	uint8_t status = inb(ide_chan[0]->base_io_port + 7);
+	uint8_t status = inb(ide_chan[0].base_io_port + 7);
 
 	//if there is any error then address it accordingly
 	if (status & 0x01){
@@ -122,7 +202,7 @@ void ide_primary_irq_handler(){
 }
 
 void ide_secondary_irq_handler(){
-	uint8_t status = inb(ide_chan[1]->base_io_port + 7);
+	uint8_t status = inb(ide_chan[1].base_io_port + 7);
 
 	//if there is any error then address it accordingly
         if (status & 0x01){
@@ -139,8 +219,8 @@ void ide_secondary_irq_handler(){
 static void disable_interrupts(){
 	//we must disable interrupts while probing
         for (int i = 0; i < 2; i++){
-                uint16_t control = ide_chan[i]->control_port;
-                uint16_t status = ide_chan[i]->base_io_port + 7;
+                uint16_t control = ide_chan[i].control_port;
+                uint16_t status = ide_chan[i].base_io_port + 7;
 
                 uint8_t val = inb(control);
                 outb(control, 0x02); //use the or bitwise operation, to ONLY disable IRQs while maintaining other bits
@@ -153,8 +233,8 @@ static void disable_interrupts(){
 static void enable_interrupts(){
         //we must disable interrupts while probing
         for (int i = 0; i < 2; i++){
-                uint16_t control = ide_chan[i]->control_port;
-                uint16_t status = ide_chan[i]->base_io_port + 7;
+                uint16_t control = ide_chan[i].control_port;
+                uint16_t status = ide_chan[i].base_io_port + 7;
 
                 uint8_t val = inb(control);
                 outb(control, 0x00); //use the or bitwise operation, to ONLY disable IRQs while maintaining other bits
@@ -169,7 +249,7 @@ static void enable_interrupts(){
 static void probe_channels(){
 	//go through both primary and secondary
 	for (int channel = 0; channel < 2; channel++){
-		uint16_t base = ide_chan[channel]->base_io_port;
+		uint16_t base = ide_chan[channel].base_io_port;
                 uint16_t status = base + 7; //looking at the status register
 		uint16_t command = base + 7;
 		for(int device = 0; device < 2; device++){
@@ -209,34 +289,34 @@ static void probe_channels(){
 			//word 83: command sets supported (tells if LBA48 is supported)
 			//words 100-103: total secotrs addressable in LBA48 mode (48-bit value across four words)
 		
-			device_placeholder = device;
+			int device_placeholder = device;
 			if (channel > 0){
 				device_placeholder += 2;
 			}
 			
-			ide_dev[device_placeholder]->channel = channel;	
-			ide_dev[device_placeholder]->type = 0;//hard setting this becuase I'm only using hard drives
-			ide_dev[device_placeholder]->drive = (device_placeholder);	
-			ide_dev[device_placeholder]->signature = identify_data[0];	
-			ide_dev[device_placeholder]->capabilities = identify_data[49];	
-			ide_dev[device_placeholder]->command_sets = identify_data[83];	
-			ide_dev[device_placeholder]->irq = ide_chan[channel].irq;
+			ide_dev[device_placeholder].channel = channel;	
+			ide_dev[device_placeholder].type = 0;//hard setting this becuase I'm only using hard drives
+			ide_dev[device_placeholder].drive = (device_placeholder);	
+			ide_dev[device_placeholder].signature = identify_data[0];	
+			ide_dev[device_placeholder].capabilities = identify_data[49];	
+			ide_dev[device_placeholder].command_sets = identify_data[83];	
+			ide_dev[device_placeholder].irq = ide_chan[channel].irq;
 			//each word will contain 2 characters, but they are swapped, which is why we must swap in the loop
 			for (int k = 0; k < 20; k++){
-				ide_dev[device_placeholder]->model[k * 2] = (identify_data[27 + k] >> 8) & 0xFF;//high byte
-				ide_dev[device_placeholder]->model[k * 2 + 1] = identify_data[27 + k] & 0xFF;//low byte
+				ide_dev[device_placeholder].model[k * 2] = (identify_data[27 + k] >> 8) & 0xFF;//high byte
+				ide_dev[device_placeholder].model[k * 2 + 1] = identify_data[27 + k] & 0xFF;//low byte
 	
 			}
-			ide_dev[device_placeholder]->model[40] = '\0'; //null terminator
-			ide_dev[device_placeholder]->exists = 1;
+			ide_dev[device_placeholder].model[40] = '\0'; //null terminator
+			ide_dev[device_placeholder].exists = 1;
 	
 			if (identify_data[83] & (1 << 10)){//use words 100-103 for a 48-bit sector count
-				ide_dev[device_placeholder]->size = ((uint64_t)identify_data[103] << 48) |
+				ide_dev[device_placeholder].size = ((uint64_t)identify_data[103] << 48) |
 					           ((uint64_t)identify_data[102] << 32) |
 						   ((uint64_t)identify_data[101] << 16) |
 						   ((uint64_t)identify_data[100]);
 			}else{//use words 60-61 for 32 bit sector count
-			      	ide_dev[device_placeholder]->size = (identify_data[61] << 16) | identify_data[60];//upper 16bits + lower 16bits
+			      	ide_dev[device_placeholder].size = (identify_data[61] << 16) | identify_data[60];//upper 16bits + lower 16bits
 			}
 		}
 		
@@ -260,6 +340,18 @@ static inline void outb(uint16_t port, uint8_t value){
                           );
 
 }
+
+static inline void outw(uint16_t port, uint8_t value){
+        //porting I/O
+
+        //assembly instructions ot put value into AL register and put port into DX register
+        __asm__ volatile ("outw %0, %1"
+                          :
+                          : "a"(value),"Nd"(port)
+                          );
+
+}
+
 
 static inline uint8_t inb(uint16_t port){
         uint8_t return_val;

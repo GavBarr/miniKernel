@@ -24,8 +24,9 @@ struct ide_channel{
 
 };
 
-void ide_init();
-void ide_read_block();
+struct block_device *ide_init();
+int ide_read_block(uint8_t device, uint32_t lba, uint8_t *buffer);
+int ide_write_block(uint8_t device, uint32_t lba, uint16_t sector_count, uint8_t *buffer);
 void ide_primary_irq_handler();
 void ide_secondary_irq_handler();
 

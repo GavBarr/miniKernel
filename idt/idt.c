@@ -56,8 +56,6 @@ extern void isr46(void);
 extern void isr47(void);
 
 
-static void ide_primary_irq_handler();
-static void ide_secondary_irq_handler();
 
 
 void idt_init(void){
