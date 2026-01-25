@@ -83,6 +83,23 @@ struct block_device *find_device(char *name){
 	
 }
 
+void get_device_list(char *buf){
+	if (manager->count == 0) return;
+
+	for (int i = 0; i < MAX_NUMBER_OF_DEVICES; i++){
+		if (manage->devices[i] == NULL) continue;
+		char *device_name = manager->devices[i]->name;
+		uint32_t length = strlength(device_name);
+		uint32_t last_index = -1;
+		for (int c = 0; c < length; c++){
+			buf[c] = device_name[c];
+			last_index = c;
+		}
+		buf[last_index + 1] = '\0';
+	}	
+
+}
+
 
 static int find_first_free_slot(){
 	for (int i = 0; i < MAX_NUMBER_OF_DEVICES; i++){
@@ -90,3 +107,6 @@ static int find_first_free_slot(){
 	}
 	return -1;
 }
+
+
+
