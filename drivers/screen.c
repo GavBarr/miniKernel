@@ -1,6 +1,7 @@
 #include "../debug/debug.h"
 #include "../include/strlength.h"
 #include "../include/strcompare.h"
+#include "../include/device_manager.h"
 #include "../kernel_shell/parser.h"
 #include "../mem_alloc/heap.h"
 #include "keyboard.h"
@@ -21,9 +22,10 @@ static inline void outb(uint16_t port, uint8_t val);
 static char *convert_int_to_char_arr(uint32_t n);
 static char *convert_pointer_to_char_arr(void *ptr);
 static uint32_t display_vga_text(char *buffer, uint32_t len, uint32_t temp_cursor_pos);
+static uint32_t display_vga_text_single_char(char buffer, uint32_t len, uint32_t temp_cursor_pos);
 static void malloc_and_print(char *size);
 static uint32_t convert_char_to_int(char *c);
-
+static void print_device_list();
 
 void display_character(char character){
 	if (character == '\b'){
@@ -58,7 +60,9 @@ void display_character(char character){
 		}else if(strcompare(command, "heap-total")){
 			kfree(command);
                         print_total_heap();
-                }else if(strcompare(command, "kmalloc\0")){
+                }else if(strcompare(command, "device-list")){
+			print_device_list();
+		}else if(strcompare(command, "kmalloc\0")){
 			uint32_t len = 8;
                         char *arg = parse_arg(get_keyboard_buffer(), len);
                         if (arg[0] != '\0'){
@@ -113,6 +117,39 @@ static void print_command_err(){
 
         }
 
+}
+
+static void print_device_list(){
+	uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
+        char *buf = kmalloc(sizeof(struct device_manager) * 16);
+	get_device_list(buf);//pass the buffer in and it will populate with list
+
+	if (buf[0] == '\0' || buf[0] == '\n') return;
+	temp_cursor_pos = display_vga_text("Devices[ ", 9, temp_cursor_pos);
+	uint32_t i = 0;
+	while (buf[i] != '\n'){
+		//change static array to dynamic pointer
+		char device_name[6];
+		int cur_char = 0;
+		while (buf[i] != '\0'){
+        		temp_cursor_pos = display_vga_text_single_char(buf[i], 1, temp_cursor_pos);
+			if (buf[i] != '\0') device_name[cur_char] = buf[i];
+			cur_char++;
+			i++;
+		}
+		struct block_device *dev = find_device(device_name);
+		char *total_size = convert_int_to_char_arr((uint64_t)(((uint64_t)dev->block_count * (uint64_t)dev->block_size) / 1024));
+		temp_cursor_pos = display_vga_text_single_char(' ', 1, temp_cursor_pos);
+		temp_cursor_pos = display_vga_text(total_size, strlength(total_size), temp_cursor_pos);
+		i++;
+		temp_cursor_pos = display_vga_text(" kb", 3, temp_cursor_pos);
+		if (buf[i] != '\n'){
+			temp_cursor_pos = display_vga_text(" : ", 3, temp_cursor_pos);
+		}
+	}
+	temp_cursor_pos = display_vga_text(" ]", 2, temp_cursor_pos);
+
+        kfree(buf);
 }
 
 
@@ -244,7 +281,7 @@ static char *convert_int_to_char_arr(uint32_t n){
     
     
     int start = i + 1;
-    int len = 11 - start;
+    int len = 10 - start + 1;
     
     
     char *buffer = (char *)kmalloc(len + 1);
@@ -290,6 +327,14 @@ static uint32_t display_vga_text(char *buffer, uint32_t len, uint32_t temp_curso
 	return temp_cursor_pos;
 }
 
+static uint32_t display_vga_text_single_char(char buffer, uint32_t len, uint32_t temp_cursor_pos){
+
+        video_cursor[temp_cursor_pos * 2] = buffer;
+        video_cursor[temp_cursor_pos * 2 + 1] = 0x0F;
+        temp_cursor_pos++;
+
+        return temp_cursor_pos;
+}
 
 static void malloc_and_print(char *size){
 	uint32_t converted_size = 12;//convert_char_to_int(size);

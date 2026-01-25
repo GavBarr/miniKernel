@@ -1,5 +1,6 @@
 #include "device_manager.h"
 #include "strcompare.h"
+#include "strlength.h"
 #include "../debug/debug.h"
 #include "../mem_alloc/heap.h"
 #include <stddef.h>
@@ -27,11 +28,11 @@ int register_block_device(struct block_device *device){
 	if (manager->count == MAX_NUMBER_OF_DEVICES) return -1;
 	if (device == NULL) return -1;
 	if (device->block_size == 0) return -1;
-
+	
 	for (uint32_t i = 0; i < MAX_NUMBER_OF_DEVICES; i++){
 		if (manager->devices[i] == NULL) continue;
 		if (manager->devices[i]->name == NULL) continue;
-		if (strcompare(manager->devices[i]->name, device->name) == 0) return -1;
+		if (strcompare(manager->devices[i]->name, device->name) == 1) return -1;
 	}
 	
 	int free_slot = find_first_free_slot();
@@ -76,9 +77,10 @@ struct block_device *find_device(char *name){
 	for (uint32_t i = 0; i < MAX_NUMBER_OF_DEVICES; i++){
 		if (manager->devices[i] == NULL) continue;
                 if (manager->devices[i]->name == NULL) continue;
+		print_string("\n\0");
                 if (strcompare(manager->devices[i]->name, name) != 0) return manager->devices[i];
         }
-
+	print_string("COULDN'T FIND DEVICE");
 	return NULL;
 	
 }
@@ -86,24 +88,29 @@ struct block_device *find_device(char *name){
 void get_device_list(char *buf){
 	if (manager->count == 0) return;
 
+	uint32_t offset = 0;
 	for (int i = 0; i < MAX_NUMBER_OF_DEVICES; i++){
-		if (manage->devices[i] == NULL) continue;
+		if (manager->devices[i] == NULL) continue;
 		char *device_name = manager->devices[i]->name;
 		uint32_t length = strlength(device_name);
-		uint32_t last_index = -1;
 		for (int c = 0; c < length; c++){
-			buf[c] = device_name[c];
-			last_index = c;
+			buf[offset++] = device_name[c];
 		}
-		buf[last_index + 1] = '\0';
+		buf[offset++] = '\0';
 	}	
+	buf[offset++] = '\n';
+	buf[offset] = '\0';
 
 }
 
 
 static int find_first_free_slot(){
+	//print_int(MAX_NUMBER_OF_DEVICES);
 	for (int i = 0; i < MAX_NUMBER_OF_DEVICES; i++){
-		if (manager->devices[i] == NULL) return i;
+		//print_int(i);
+		if (manager->devices[i] == NULL){
+		       	return i;
+		}
 	}
 	return -1;
 }

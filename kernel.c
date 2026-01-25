@@ -33,8 +33,11 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	heap_init();
 	device_manager_init();
 
-	struct block_device *dev = ide_init();
+	struct block_device *dev = ramdisk_init();
 	int check = register_block_device(dev);
+
+	struct block_device *dev1 = ide_init();
+	int check2 = register_block_device(dev1);
 	if (debug){
 		uint8_t *buffer = kmalloc(512);
 		print_string(dev->name);

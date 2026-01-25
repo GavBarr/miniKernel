@@ -58,7 +58,7 @@ struct block_device *ide_init(){
         disk->data = (void *)0;
 
 
-	//print_int(ide_dev[1].exists);
+//	print_int(disk->block_count);
 
         return disk;
 

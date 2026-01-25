@@ -27,6 +27,7 @@ gcc $CFLAGS -c debug/debug.c      -o debug/debug.o
 gcc $CFLAGS -c kernel_shell/shell.c      -o kernel_shell/shell.o
 gcc $CFLAGS -c include/strcompare.c      -o include/strcompare.o
 gcc $CFLAGS -c include/strlength.c      -o include/strlength.o
+gcc $CFLAGS -c include/memset.c      -o include/memset.o
 gcc $CFLAGS -c include/device_manager.c      -o include/device_manager.o
 
 echo "Linking..."
@@ -35,7 +36,7 @@ ld -m elf_i386 -T linker.ld \
   start.o kernel.o gdt/gdt.o gdt/gdt_flush.o idt/idt.o idt/isr_stubs.o \
   drivers/keyboard.o drivers/screen.o drivers/ramdisk.o drivers/ide_ata_driver.o  kernel_shell/parser.o \
   mem_alloc/mm.o mem_alloc/mem_alloc.o mem_alloc/bitmap.o \
-  mem_alloc/heap.o paging/paging.o debug/debug.o kernel_shell/shell.o include/strcompare.o include/strlength.o \
+  mem_alloc/heap.o paging/paging.o debug/debug.o kernel_shell/shell.o include/strcompare.o include/strlength.o include/memset.o\
   include/device_manager.o
 
 echo "CreatingISO..."
