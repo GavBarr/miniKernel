@@ -39,10 +39,10 @@ void display_character(char character){
 	}
 
 	if (character == '\n'){
-                char *command = parse_command(get_keyboard_buffer());
-                if (strcompare(command,"echo\0")){
+               char *command = parse_command(get_keyboard_buffer());
+               if (strcompare(command,"echo\0")){
 
-                	uint32_t len = 5;
+               	uint32_t len = 5;
                         char *arg = parse_arg(get_keyboard_buffer(), len);
 
                         if (arg[0] != '\0'){
@@ -50,17 +50,19 @@ void display_character(char character){
                         }
 			if (arg) kfree(arg);
 			kfree(command);
-		}else if(strcompare(command, "clear\n")){
+		}else if(strcompare(command, "clear")){
 			kfree(command);
 			clear_screen();
 			row=0;
+	
 		}else if(strcompare(command, "heap-start")){
 			kfree(command);
 			print_heap();
-		}else if(strcompare(command, "heap-total")){
+		}else if(strcompare(command, "heap")){
 			kfree(command);
                         print_total_heap();
-                }else if(strcompare(command, "device-list")){
+                }else if(strcompare(command, "ds")){
+			kfree(command);
 			print_device_list();
 		}else if(strcompare(command, "kmalloc\0")){
 			uint32_t len = 8;
@@ -81,6 +83,7 @@ void display_character(char character){
 		print_prompt();
 		//kfree(command);
 		//walk_and_print_heap();
+		
 		return;	
 	}
 
@@ -124,7 +127,10 @@ static void print_device_list(){
         char *buf = kmalloc(sizeof(struct device_manager) * 16);
 	get_device_list(buf);//pass the buffer in and it will populate with list
 
-	if (buf[0] == '\0' || buf[0] == '\n') return;
+	if (buf[0] == '\0' || buf[0] == '\n'){
+	 	kfree(buf);      
+		return;
+	}
 	temp_cursor_pos = display_vga_text("Devices[ ", 9, temp_cursor_pos);
 	uint32_t i = 0;
 	while (buf[i] != '\n'){
@@ -141,6 +147,7 @@ static void print_device_list(){
 		char *total_size = convert_int_to_char_arr((uint64_t)(((uint64_t)dev->block_count * (uint64_t)dev->block_size) / 1024));
 		temp_cursor_pos = display_vga_text_single_char(' ', 1, temp_cursor_pos);
 		temp_cursor_pos = display_vga_text(total_size, strlength(total_size), temp_cursor_pos);
+		kfree((void *)total_size);
 		i++;
 		temp_cursor_pos = display_vga_text(" kb", 3, temp_cursor_pos);
 		if (buf[i] != '\n'){
@@ -189,18 +196,27 @@ static void print_total_heap(){
         void *current = get_heap_start();
 	void *end = get_heap_end();
 
-	//hardcoded heap_end value for now TODO
 	while (current < end){
 		struct block_header *block = (struct block_header *)current;
-	        char *addr = convert_pointer_to_char_arr(current);
+	        //char *addr = convert_pointer_to_char_arr(current);
 		if (block->size != 0){
-		       temp_cursor_pos = display_vga_text("address->", 9, temp_cursor_pos);
-		       temp_cursor_pos = display_vga_text(addr, 10, temp_cursor_pos);
-	               if (block->free_flag != 1) temp_cursor_pos = display_vga_text(" X ", 2, temp_cursor_pos);
-	               temp_cursor_pos = display_vga_text("| ", 2, temp_cursor_pos);
-		       kfree(addr);
-		       row++;
-		       temp_cursor_pos = ((row * 2) - 1) * 80;
+			char *size = convert_int_to_char_arr(block->size);
+		       //temp_cursor_pos = display_vga_text("address->", 9, temp_cursor_pos);
+		       //temp_cursor_pos = display_vga_text(addr, 10, temp_cursor_pos);
+		       temp_cursor_pos = display_vga_text("[ ", 2, temp_cursor_pos);
+	               if (block->free_flag == 1){
+			       temp_cursor_pos = display_vga_text(size, strlength(size), temp_cursor_pos);
+		       }else{
+			       temp_cursor_pos = display_vga_text_single_char('*', 1, temp_cursor_pos);
+			       temp_cursor_pos = display_vga_text(size, strlength(size), temp_cursor_pos);
+			       temp_cursor_pos = display_vga_text_single_char('*', 1, temp_cursor_pos);
+		       }
+			temp_cursor_pos = display_vga_text(" ]", 2, temp_cursor_pos);
+		       //temp_cursor_pos = display_vga_text("| ", 2, temp_cursor_pos);
+		       kfree(size);
+			
+//		       		row++;
+//		       		temp_cursor_pos = ((row * 2) - 1) * 80;
 
 		}else{
 			break;
@@ -209,6 +225,7 @@ static void print_total_heap(){
 		void *next = (void *)((uint32_t)current + sizeof(struct block_header) + (uint32_t)block->size);
 		current = next;
 	}
+	row += 2;
 	
 
 }
