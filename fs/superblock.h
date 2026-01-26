@@ -1,6 +1,6 @@
 #ifndef SUPERBLOCK_H
 #define SUPERBLOCK_H
-#include <stdio.h>
+#include <stdint.h>
 #include "../include/block_device.h"
 
 struct Superblock {
@@ -21,7 +21,7 @@ struct Superblock {
 
 void superblock_init(struct Superblock *s, uint32_t disksize);
 
-int superblock_read(struct Superblock *s, struct block_device *disk);
+int superblock_read(struct Superblock *s, struct block_device *disk, void *buf);
 
 int superblock_write(struct block_device *disk, struct Superblock *s);
 

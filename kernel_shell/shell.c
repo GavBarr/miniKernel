@@ -7,9 +7,9 @@
 #include <stddef.h>
 
 void shell_run(){
-	print_string("._____._____._____._____._____.\n\0");
-	print_string("|  _  |  _  |  _  |__ --|  -__|\n\0");
-	print_string("|___  |_____|_____|_____|_____|\n\0");
+	print_string("._____._____._____._____._____.  __\n\0");
+	print_string("|  _  |  _  |  _  |__ --|  -__|<(o )___\n\0");
+	print_string("|___  |_____|_____|_____|_____| (______)\n\0");
 	print_string("|_____|\n\0");
 	print_string("goose>\n\0");
 	while (1){

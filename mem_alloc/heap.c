@@ -83,10 +83,6 @@ void *kmalloc(uint32_t size){
 	return (void *)(block + 1);
 }
 void kfree(void *block_ptr){
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
 	if (block_ptr < heap_start || block_ptr >= heap_end) {
 	//irint_pointer(block_ptr);
 		print_string("\n\0");

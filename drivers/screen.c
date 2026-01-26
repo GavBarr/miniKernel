@@ -21,8 +21,8 @@ static void print_total_heap();
 static inline void outb(uint16_t port, uint8_t val);
 static char *convert_int_to_char_arr(uint32_t n);
 static char *convert_pointer_to_char_arr(void *ptr);
-static uint32_t display_vga_text(char *buffer, uint32_t len, uint32_t temp_cursor_pos);
-static uint32_t display_vga_text_single_char(char buffer, uint32_t len, uint32_t temp_cursor_pos);
+static uint32_t display_vga_text(char *buffer, uint32_t len, uint32_t temp_cursor_pos, uint8_t color);
+static uint32_t display_vga_text_single_char(char buffer, uint32_t len, uint32_t temp_cursor_pos, uint8_t color);
 static void malloc_and_print(char *size);
 static uint32_t convert_char_to_int(char *c);
 static void print_device_list();
@@ -131,30 +131,30 @@ static void print_device_list(){
 	 	kfree(buf);      
 		return;
 	}
-	temp_cursor_pos = display_vga_text("Devices[ ", 9, temp_cursor_pos);
+	temp_cursor_pos = display_vga_text("Devices[ ", 9, temp_cursor_pos, 0x0F);
 	uint32_t i = 0;
 	while (buf[i] != '\n'){
 		//change static array to dynamic pointer
 		char device_name[6];
 		int cur_char = 0;
 		while (buf[i] != '\0'){
-        		temp_cursor_pos = display_vga_text_single_char(buf[i], 1, temp_cursor_pos);
+        		temp_cursor_pos = display_vga_text_single_char(buf[i], 1, temp_cursor_pos, 0x05);
 			if (buf[i] != '\0') device_name[cur_char] = buf[i];
 			cur_char++;
 			i++;
 		}
 		struct block_device *dev = find_device(device_name);
 		char *total_size = convert_int_to_char_arr((uint64_t)(((uint64_t)dev->block_count * (uint64_t)dev->block_size) / 1024));
-		temp_cursor_pos = display_vga_text_single_char(' ', 1, temp_cursor_pos);
-		temp_cursor_pos = display_vga_text(total_size, strlength(total_size), temp_cursor_pos);
+		temp_cursor_pos = display_vga_text_single_char(' ', 1, temp_cursor_pos, 0x0F);
+		temp_cursor_pos = display_vga_text(total_size, strlength(total_size), temp_cursor_pos, 0x02);
 		kfree((void *)total_size);
 		i++;
-		temp_cursor_pos = display_vga_text(" kb", 3, temp_cursor_pos);
+		temp_cursor_pos = display_vga_text(" kb", 3, temp_cursor_pos, 0x0F);
 		if (buf[i] != '\n'){
-			temp_cursor_pos = display_vga_text(" : ", 3, temp_cursor_pos);
+			temp_cursor_pos = display_vga_text(" : ", 3, temp_cursor_pos, 0x0F);
 		}
 	}
-	temp_cursor_pos = display_vga_text(" ]", 2, temp_cursor_pos);
+	temp_cursor_pos = display_vga_text(" ]", 2, temp_cursor_pos, 0x0F);
 
         kfree(buf);
 }
@@ -173,16 +173,16 @@ static void print_heap(){
 	uint32_t size_len = strlength(size);
 	uint32_t free_len = strlength(free);
 	//addr	
-	temp_cursor_pos = display_vga_text("address->", 9, temp_cursor_pos);
-	temp_cursor_pos = display_vga_text(addr, 10, temp_cursor_pos);
+	temp_cursor_pos = display_vga_text("address->", 9, temp_cursor_pos, 0x0F);
+	temp_cursor_pos = display_vga_text(addr, 10, temp_cursor_pos, 0x02);
 
 	//size
-	temp_cursor_pos = display_vga_text(" size->", 7, temp_cursor_pos);
-	temp_cursor_pos = display_vga_text(size, size_len, temp_cursor_pos);
+	temp_cursor_pos = display_vga_text(" size->", 7, temp_cursor_pos, 0x0F);
+	temp_cursor_pos = display_vga_text(size, size_len, temp_cursor_pos, 0x02);
 
 	//free_flag
-	temp_cursor_pos = display_vga_text(" free_flag->", 12, temp_cursor_pos);
-	temp_cursor_pos = display_vga_text(free, free_len, temp_cursor_pos);
+	temp_cursor_pos = display_vga_text(" free_flag->", 12, temp_cursor_pos, 0x0F);
+	temp_cursor_pos = display_vga_text(free, free_len, temp_cursor_pos, 0x02);
 
 	kfree(addr);
 	kfree(size);
@@ -203,15 +203,15 @@ static void print_total_heap(){
 			char *size = convert_int_to_char_arr(block->size);
 		       //temp_cursor_pos = display_vga_text("address->", 9, temp_cursor_pos);
 		       //temp_cursor_pos = display_vga_text(addr, 10, temp_cursor_pos);
-		       temp_cursor_pos = display_vga_text("[ ", 2, temp_cursor_pos);
+		       temp_cursor_pos = display_vga_text("[ ", 2, temp_cursor_pos, 0x0F);
 	               if (block->free_flag == 1){
-			       temp_cursor_pos = display_vga_text(size, strlength(size), temp_cursor_pos);
+			       temp_cursor_pos = display_vga_text(size, strlength(size), temp_cursor_pos, 0x02);
 		       }else{
-			       temp_cursor_pos = display_vga_text_single_char('*', 1, temp_cursor_pos);
-			       temp_cursor_pos = display_vga_text(size, strlength(size), temp_cursor_pos);
-			       temp_cursor_pos = display_vga_text_single_char('*', 1, temp_cursor_pos);
+			       temp_cursor_pos = display_vga_text_single_char('*', 1, temp_cursor_pos, 0x0F);
+			       temp_cursor_pos = display_vga_text(size, strlength(size), temp_cursor_pos, 0x02);
+			       temp_cursor_pos = display_vga_text_single_char('*', 1, temp_cursor_pos, 0x0F);
 		       }
-			temp_cursor_pos = display_vga_text(" ]", 2, temp_cursor_pos);
+			temp_cursor_pos = display_vga_text(" ]", 2, temp_cursor_pos, 0x0F);
 		       //temp_cursor_pos = display_vga_text("| ", 2, temp_cursor_pos);
 		       kfree(size);
 			
@@ -333,21 +333,21 @@ static char *convert_pointer_to_char_arr(void *ptr){
 }
 
 
-static uint32_t display_vga_text(char *buffer, uint32_t len, uint32_t temp_cursor_pos){
+static uint32_t display_vga_text(char *buffer, uint32_t len, uint32_t temp_cursor_pos, uint8_t color){
 
 	for (uint32_t i = 0; i < len; i++){
                 video_cursor[temp_cursor_pos * 2] = buffer[i];
-                video_cursor[temp_cursor_pos * 2 + 1] = 0x0F;
+                video_cursor[temp_cursor_pos * 2 + 1] = color;
                 temp_cursor_pos++;
         }
 
 	return temp_cursor_pos;
 }
 
-static uint32_t display_vga_text_single_char(char buffer, uint32_t len, uint32_t temp_cursor_pos){
+static uint32_t display_vga_text_single_char(char buffer, uint32_t len, uint32_t temp_cursor_pos, uint8_t color){
 
         video_cursor[temp_cursor_pos * 2] = buffer;
-        video_cursor[temp_cursor_pos * 2 + 1] = 0x0F;
+        video_cursor[temp_cursor_pos * 2 + 1] = color;
         temp_cursor_pos++;
 
         return temp_cursor_pos;
@@ -359,7 +359,7 @@ static void malloc_and_print(char *size){
 	if (converted_size == 0) return;
 	void *addr = kmalloc(converted_size);
 	uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
-	temp_cursor_pos = display_vga_text("ALLOCATED!", 10, temp_cursor_pos);
+	temp_cursor_pos = display_vga_text("ALLOCATED!", 10, temp_cursor_pos, 0xE);
 }
 
 

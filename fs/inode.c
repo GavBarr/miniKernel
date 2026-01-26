@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <time.h>
-#include <string.h>
 #include <stdint.h>
 #include "inode.h"
 #include "superblock.h"
@@ -16,8 +13,8 @@ int inode_init(struct Inode *i){
 	i->size = 0;
         i->type = FILE_TYPE;
         i->permissions = 0666;
-        i->created_time = (uint64_t)time(NULL);
-        i->modified_time = (uint64_t)time(NULL);
+        i->created_time = (uint64_t)0;
+        i->modified_time = (uint64_t)0;
 	kmemset(i->data_blocks,-1,sizeof(i->data_blocks));	
 	
 	return 0;
@@ -69,10 +66,10 @@ uint32_t inode_allocate_block(struct Inode *i, struct Bitmap *b, struct Superblo
 
 	if (data_blocks_index == 12) return -1;
 	
-	uint32_t free_bit = bitmap_find_free(b);
+	uint32_t free_bit = fs_bitmap_find_free(b);
 	if (free_bit == (uint32_t)-1) return -1;
 
-	if((bitmap_set(b, free_bit)) != 0) return -1;
+	if((fs_bitmap_set(b, free_bit)) != 0) return -1;
 
 	i->data_blocks[data_blocks_index] = free_bit;
 
@@ -90,7 +87,7 @@ uint32_t inode_free_block(struct Inode *i, struct Bitmap *b, struct Superblock *
 	for (uint32_t index = 0; index < 12; index ++){
 		if (i->data_blocks[index] == (uint32_t)-1) continue;
 
-		bitmap_clear(b, i->data_blocks[index]);
+		fs_bitmap_clear(b, i->data_blocks[index]);
 		i->data_blocks[index] = (uint32_t)-1;
 		s->free_blocks++;
 	

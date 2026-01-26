@@ -2,10 +2,15 @@
 #include <stddef.h>
 #include "drivers/ramdisk.h"
 #include "drivers/ide_ata_driver.h"
+#include "fs/superblock.h"
+#include "fs/bitmap.h"
+#include "fs/inode.h"
+#include "fs/file.h"
 #include "gdt/gdt.h"
 #include "idt/idt.h"
 #include "include/device_manager.h"
 #include "include/block_device.h"
+#include "include/strlength.h"
 #include "mem_alloc/heap.h"
 #include "mem_alloc/multiboot.h"
 #include "mem_alloc/mem_alloc.h"
@@ -15,6 +20,7 @@
 #include "kernel_shell/shell.h"
 
 static uint32_t debug = 0;
+static void test_file_ops(uint32_t disk_size, struct block_device *disk);
 
 void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 //	if (magic != 0x2BADB002){
@@ -36,8 +42,10 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	struct block_device *dev = ide_init();
 	int check = register_block_device(dev);
 
-//	struct block_device *dev1 = ide_init();
-//	int check2 = register_block_device(dev1);
+	//test_file_ops(dev->block_size * dev->block_count, dev);
+
+	//struct block_device *dev1 = ide_init();
+	//int check2 = register_block_device(dev1);
 	if (debug){
 		uint8_t *buffer = kmalloc(512);
 		print_string(dev->name);
@@ -95,5 +103,31 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	while(1){
 		
 	};
+
+}
+
+static void test_file_ops(uint32_t disk_size, struct block_device *disk){
+	struct Superblock *sb = kmalloc(sizeof(struct Superblock));
+	struct Bitmap *b = kmalloc(sizeof(struct Bitmap));
+
+	superblock_init(sb, disk_size);
+	fs_bitmap_init(b, 256);
+
+	uint32_t inode_num;
+	file_create(sb, &inode_num, b, 0777, disk);
+	char *test = "Hi! This is a test for my simple filesystem...";
+	uint32_t len = strlength(test);
+
+	struct Inode *inode;
+	inode_read(inode, inode_num, sb, disk);
+
+	int write_status = file_write(inode, inode_num, test, 0, len, b,  sb, disk);
+
+	char *data;
+	//int read_status = file_read(inode, inode_num, (void *)data, 0, inode->size, sb, disk);
+	//print_string(data);
+
+	//kfree(sb);
+	//kfree(b);
 
 }

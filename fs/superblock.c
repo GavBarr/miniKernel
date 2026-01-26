@@ -2,7 +2,7 @@
 #include "inode.h"
 #include "../include/block_device.h"
 #include <stdint.h>
-#include <stddev.h>
+#include <stddef.h>
 
 #define MAGIC_NUMBER 0x53465300
 
@@ -25,7 +25,7 @@ void superblock_init(struct Superblock *s, uint32_t disk_size){
 
 }
 
-int superblock_read(struct Superblock *s, struct block_device *disk){
+int superblock_read(struct Superblock *s, struct block_device *disk, void *buf){
 
 	if(disk == NULL) return -1;
 
@@ -44,10 +44,10 @@ int superblock_write(struct block_device *disk, struct Superblock *s){
 
 	if(disk == NULL) return -1;
 
-	int written = disk->ops->write_block(dev, 0, (void *)s);//fwrite((void *)s, sizeof(struct Superblock), 1, disk);
+	int written = disk->ops->write_block(disk, 0, (void *)s);//fwrite((void *)s, sizeof(struct Superblock), 1, disk);
 	if(written != 0) return -1;
 
-	int flush = dev->ops->flush(dev);
+	int flush = disk->ops->flush(disk);
 	if(flush != 0) return -1;
 
 	return 0;
