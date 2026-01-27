@@ -42,7 +42,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	struct block_device *dev = ide_init();
 	int check = register_block_device(dev);
 
-	//test_file_ops(dev->block_size * dev->block_count, dev);
+	test_file_ops(dev->block_size * dev->block_count, dev);
 
 	//struct block_device *dev1 = ide_init();
 	//int check2 = register_block_device(dev1);
@@ -108,26 +108,33 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 static void test_file_ops(uint32_t disk_size, struct block_device *disk){
 	struct Superblock *sb = kmalloc(sizeof(struct Superblock));
-	struct Bitmap *b = kmalloc(sizeof(struct Bitmap));
+	struct Bitmap *inode_bitmap = kmalloc(sizeof(struct Bitmap));
+	struct Bitmap *block_bitmap = kmalloc(sizeof(struct Bitmap));
+
 
 	superblock_init(sb, disk_size);
-	fs_bitmap_init(b, 256);
+	fs_bitmap_init(inode_bitmap, 256);
+	fs_bitmap_init(block_bitmap, sb->total_blocks);
+
 
 	uint32_t inode_num;
-	file_create(sb, &inode_num, b, 0777, disk);
+	file_create(sb, &inode_num, inode_bitmap, 0777, disk);
 	char *test = "Hi! This is a test for my simple filesystem...";
 	uint32_t len = strlength(test);
-
-	struct Inode *inode;
+	struct Inode *inode = kmalloc(sizeof(struct Inode));
 	inode_read(inode, inode_num, sb, disk);
+//	int write_status = file_write(inode, inode_num, test, 0, len, block_bitmap,  sb, disk);
+//	print_int(write_status);
+//	char *data = kmalloc(inode->size + 1);
+//	int read_status = file_read(inode, inode_num, (void *)data, 1, inode->size, sb, disk);
+//	data[inode->size] = '\0';
+//	print_string(data);
 
-	int write_status = file_write(inode, inode_num, test, 0, len, b,  sb, disk);
+//	file_delete(inode_num, sb, inode_bitmap, block_bitmap, disk);
 
-	char *data;
-	//int read_status = file_read(inode, inode_num, (void *)data, 0, inode->size, sb, disk);
-	//print_string(data);
-
-	//kfree(sb);
-	//kfree(b);
+//	kfree(sb);
+//	kfree(inode_bitmap);
+//	kfree(block_bitmap);
+	//kfree(data);
 
 }

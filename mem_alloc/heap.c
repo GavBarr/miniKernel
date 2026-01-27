@@ -100,7 +100,7 @@ void kfree(void *block_ptr){
 
 	struct block_header *block = (struct block_header *)block_ptr - 1;
 	block->free_flag = 1;
-	coalescence_adjacent_block(block);
+	//coalescence_adjacent_block(block);
 }
 
 static void coalescence_adjacent_block(struct block_header *block){
@@ -128,6 +128,9 @@ static void coalescence_adjacent_block(struct block_header *block){
 }
 
 static void *find_free_block(uint32_t size){
+	//print_int(size);
+	//print_string("\n\0");
+	//print_int(HEAP_SIZE);
 	if (size > HEAP_SIZE) return NULL;
 	struct block_header *current_block = first_block;
 

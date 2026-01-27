@@ -76,7 +76,6 @@ int file_write(struct Inode *inode, uint32_t inode_num, void *buffer, uint32_t o
 			if (new_block == -1) return -1; //bail if no space
 		}
 	}
-	//print_string("HERE\n\0");	
 	uint32_t bytes_written = 0;
 	for (int i = start_block; i <= end_block; i++){
 		uint32_t block_offset = (i == start_block) ? (offset % block_size) : 0;
@@ -103,6 +102,7 @@ int file_write(struct Inode *inode, uint32_t inode_num, void *buffer, uint32_t o
 		kfree(block_buf);
 	}
 
+	print_string("HERE\n\0");	
 	uint32_t new_end = offset + size;
 	if (new_end > inode->size){
 		inode->size = new_end;
@@ -114,7 +114,25 @@ int file_write(struct Inode *inode, uint32_t inode_num, void *buffer, uint32_t o
 
 }
 
-int file_delete(uint32_t inode_num){
+int file_delete(uint32_t inode_num, struct Superblock *sb, struct Bitmap *inode_bitmap, struct Bitmap *block_bitmap, struct block_device *disk){
+	struct Inode inode;
+	if (inode_read(&inode, inode_num, sb, disk) != 0) return -1;
+	for (int i = 0; i < 12; i++){
+		if (inode.data_blocks[i] != -1){
+			fs_bitmap_clear(block_bitmap, inode.data_blocks[i]);
+			inode.data_blocks[i] = -1;
+		}
+	}
+
+	inode_init(&inode);
+	if (inode_write(&inode, inode_num, sb, disk) != 0) return -1;
+	fs_bitmap_clear(inode_bitmap, inode_num);
+
+	sb->free_inodes++;
+	superblock_write(disk, sb);
+
+	return 0;
+
 }
 
 

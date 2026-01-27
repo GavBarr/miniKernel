@@ -19,7 +19,7 @@ int inode_init(struct Inode *i);
 int inode_write(struct Inode *i, uint32_t inode_number, struct Superblock *s, struct block_device *disk);
 int inode_read(struct Inode *i, uint32_t inode_number, struct Superblock *s, struct block_device *disk);
 uint32_t inode_allocate_block(struct Inode *i, struct Bitmap *b, struct Superblock *s);
-int inode_free_blocks(struct Inode *i, struct Bitmap *b, struct Superblock *s);
+int inode_free_block(struct Inode *i, struct Bitmap *b, struct Superblock *s);
 int test_inode();
 
 

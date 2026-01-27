@@ -1,0 +1,16 @@
+kernel.c:		int status = dev->ops->write_block(dev, 2 , buffer);
+kernel.c:		status = dev->ops->write_block(dev, 3 , buffer);
+kernel.c:		status = dev->ops->write_block(dev, 4 , buffer);
+kernel.c:		status = dev->ops->write_block(dev, 500 , buffer);
+kernel.c:		int status2 = dev->ops->read_block(dev, 500, buffer2);
+kernel.c:		int status3 = dev->ops->flush(dev);
+fs/superblock.c:	int read = disk->ops->read_block(disk, 0, buf);
+fs/superblock.c:	int written = disk->ops->write_block(disk, 0, (void *)s);//fwrite((void *)s, sizeof(struct Superblock), 1, disk);
+fs/superblock.c:	int flush = disk->ops->flush(disk);
+fs/inode.c:	int written = disk->ops->write_block(disk,offset,(void *)i);	
+fs/inode.c:	int read = disk->ops->read_block(disk, offset, (void *)i);
+fs/file.c:		disk->ops->read_block(disk, block_num, block_buf);
+fs/file.c:		disk->ops->read_block(disk, inode->data_blocks[i], block_buf);
+fs/file.c:		disk->ops->write_block(disk, inode->data_blocks[i], block_buf);
+fs/bitmap.c:        int records_written = disk->ops->write_block(disk, block_number, (void *)b);
+fs/bitmap.c:        int records_read = disk->ops->read_block(disk, block_number, b);//fread(b->data, 1, b->size, disk);

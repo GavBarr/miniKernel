@@ -67,7 +67,7 @@ int fs_bitmap_test(struct Bitmap *b, uint32_t bit_index){
 }
 uint32_t fs_bitmap_find_free(struct Bitmap *b){
 
-        uint32_t bytes = b->size / 8;
+        uint32_t bytes = b->size;// / 8;
 
         for (uint32_t i = 0; i < bytes; i++){
                 uint8_t byte = b->data[i];
