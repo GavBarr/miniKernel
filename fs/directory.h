@@ -10,12 +10,12 @@ struct dir_entry{
 	uint16_t entry_length; //total size of the entry
 	uint8_t name_length;
 	uint8_t file_type;
-	char name[];
+//	char name[];
 }__attribute__((packed));;
 
 
-//int dir_lookup(struct Inode *inode, char *name, uint32_t *inode_num);
-//int dir_remove_entry(struct Inode *inode, char *name);
-int dir_add_entry(struct Inode *dir_inode, char *name, uint32_t inode_num, uint8_t type, struct block_device *disk, struct Superblock *sb);
+int dir_lookup(struct Inode *inode, char *name, uint32_t *inode_num, struct Superblock *sb, struct block_device *disk);
+int dir_remove_entry(struct Inode *inode, uint32_t inode_num, char *name, struct Superbock *sb, struct block_device *disk);
+int dir_add_entry(struct Inode *dir_inode, char *name, uint32_t inode_num, uint8_t type, struct block_device *disk, struct Superblock *sb, struct Bitmap *block_bitmap);
 //int dir_create(uint32_t parent_inode, char *name, uint32_t permissions);
 #endif

@@ -1,12 +1,12 @@
 #include "strcompare.h"
+#include "strlength.h"
 #include <stdint.h>
 
 uint32_t strcompare(const char *first, const char *second){
 	
-	while (*first && *second){
-		if (*first != *second) return 0;
-		first++;
-		second++;
+	for (uint32_t i = 0; i < strlength(second); i++) {
+      		if (first[i] != second[i]) return 0;
 	}
-	return *first == *second;
+
+	return 1;
 }

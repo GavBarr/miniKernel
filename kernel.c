@@ -121,26 +121,17 @@ static void test_file_ops(uint32_t disk_size, struct block_device *disk){
 	fs_bitmap_init(block_bitmap, sb->total_blocks);
 
 
-	uint32_t inode_num;
-	file_create(sb, &inode_num, inode_bitmap, 0777, disk);
-	//char *test = "Hi! This is a test for my simple filesystem...";
-	//uint32_t len = strlength(test);
-	//struct Inode *inode = kmalloc(sizeof(struct Inode));
-	//inode_init(inode);
-	//inode_read(inode, inode_num, sb, disk);
-	//int write_status = file_write(inode, inode_num, test, 0, len, block_bitmap,  sb, disk);
-	//inode_read(inode, inode_num, sb, disk);
-	//char *data = kmalloc(inode->size + 1);
-	//int read_status = file_read(inode, inode_num, (void *)data, 0, inode->size, sb, disk);
-	//data[inode->size] = '\0';
-//	print_string(data);
+	uint32_t dir_inode_num;
+	file_create(sb, &dir_inode_num, inode_bitmap, 0777, disk);
 
 	struct Inode *dir_inode = kmalloc(sizeof(struct Inode));
-	inode_init(dir_inode);
+	inode_read(dir_inode, dir_inode_num, sb, disk);
+	dir_inode->type = 1;
+	inode_write(dir_inode, dir_inode_num, sb, disk);
+	if (dir_add_entry(dir_inode, "test.txt", dir_inode_num, 0, disk, sb, block_bitmap) != 0) print_string("FAILED ADDING DIR ENTRY\n\0");
 
-	//dir_add_entry(dir_inode, "test.txt", inode_num, 0, disk, sb);
-
-	//file_delete(inode_num, sb, inode_bitmap, block_bitmap, disk);
+	uint32_t dir_inode_num2;
+	dir_lookup(dir_inode, "test.txt", &dir_inode_num2, sb, disk);
 
 	kfree(inode_bitmap->data);
 	kfree(block_bitmap->data);
@@ -149,6 +140,5 @@ static void test_file_ops(uint32_t disk_size, struct block_device *disk){
 	kfree(sb);
 	kfree(inode_bitmap);
 	kfree(block_bitmap);
-//	kfree(data);
 
 }
