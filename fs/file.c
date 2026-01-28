@@ -35,16 +35,20 @@ int file_read(struct Inode *inode, uint32_t inode_num, void *buffer, uint32_t of
 	uint32_t bytes_read = 0;
 
 	uint32_t index = start_block;
-	while (bytes_read < size && index < 12){
-		if (offset >= inode->size) break;
-		if (offset + size > inode->size) size = inode->size - offset;
 
+
+	if (offset >= inode->size) return 0;
+        if (offset + size > inode->size) size = inode->size - offset;
+
+	while (bytes_read < size && index < 12){
+		
 		uint32_t block_num = inode->data_blocks[index];
 		if (block_num == (uint32_t)-1) break; //break because only empty blocks going forward
 		uint8_t block_buf[block_size];
 		disk->ops->read_block(disk, block_num, block_buf);
 	
-		uint32_t block_offset = offset % block_size;
+		uint32_t block_offset = (index == start_block) ? (offset % block_size) : 0;//uint32_t block_offset = offset % block_size;
+
 		uint32_t chunk = block_size - block_offset; //calc bytes left to read
 		if (chunk > size - bytes_read) chunk = size - bytes_read;
 
@@ -53,8 +57,8 @@ int file_read(struct Inode *inode, uint32_t inode_num, void *buffer, uint32_t of
 			temp_buf[i + bytes_read] = block_buf[i + block_offset];	
 		}
 		bytes_read += chunk;
+	//	offset += chunk;
 		index++;
-		block_offset = 0; //after the first block we don't need an offset, so we clear it
 		
 			
 	}
@@ -102,7 +106,6 @@ int file_write(struct Inode *inode, uint32_t inode_num, void *buffer, uint32_t o
 		kfree(block_buf);
 	}
 
-	print_string("HERE\n\0");	
 	uint32_t new_end = offset + size;
 	if (new_end > inode->size){
 		inode->size = new_end;

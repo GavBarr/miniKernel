@@ -6,11 +6,13 @@
 #include "fs/bitmap.h"
 #include "fs/inode.h"
 #include "fs/file.h"
+#include "fs/directory.h"
 #include "gdt/gdt.h"
 #include "idt/idt.h"
 #include "include/device_manager.h"
 #include "include/block_device.h"
 #include "include/strlength.h"
+#include "include/memcopy.h"
 #include "mem_alloc/heap.h"
 #include "mem_alloc/multiboot.h"
 #include "mem_alloc/mem_alloc.h"
@@ -41,6 +43,8 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 	struct block_device *dev = ide_init();
 	int check = register_block_device(dev);
+
+
 
 	test_file_ops(dev->block_size * dev->block_count, dev);
 
@@ -119,22 +123,32 @@ static void test_file_ops(uint32_t disk_size, struct block_device *disk){
 
 	uint32_t inode_num;
 	file_create(sb, &inode_num, inode_bitmap, 0777, disk);
-	char *test = "Hi! This is a test for my simple filesystem...";
-	uint32_t len = strlength(test);
-	struct Inode *inode = kmalloc(sizeof(struct Inode));
-	inode_read(inode, inode_num, sb, disk);
-//	int write_status = file_write(inode, inode_num, test, 0, len, block_bitmap,  sb, disk);
-//	print_int(write_status);
-//	char *data = kmalloc(inode->size + 1);
-//	int read_status = file_read(inode, inode_num, (void *)data, 1, inode->size, sb, disk);
-//	data[inode->size] = '\0';
+	//char *test = "Hi! This is a test for my simple filesystem...";
+	//uint32_t len = strlength(test);
+	//struct Inode *inode = kmalloc(sizeof(struct Inode));
+	//inode_init(inode);
+	//inode_read(inode, inode_num, sb, disk);
+	//int write_status = file_write(inode, inode_num, test, 0, len, block_bitmap,  sb, disk);
+	//inode_read(inode, inode_num, sb, disk);
+	//char *data = kmalloc(inode->size + 1);
+	//int read_status = file_read(inode, inode_num, (void *)data, 0, inode->size, sb, disk);
+	//data[inode->size] = '\0';
 //	print_string(data);
 
-//	file_delete(inode_num, sb, inode_bitmap, block_bitmap, disk);
+	struct Inode *dir_inode = kmalloc(sizeof(struct Inode));
+	inode_init(dir_inode);
 
-//	kfree(sb);
-//	kfree(inode_bitmap);
-//	kfree(block_bitmap);
-	//kfree(data);
+	//dir_add_entry(dir_inode, "test.txt", inode_num, 0, disk, sb);
+
+	//file_delete(inode_num, sb, inode_bitmap, block_bitmap, disk);
+
+	kfree(inode_bitmap->data);
+	kfree(block_bitmap->data);
+	kfree(dir_inode);
+
+	kfree(sb);
+	kfree(inode_bitmap);
+	kfree(block_bitmap);
+//	kfree(data);
 
 }

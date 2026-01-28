@@ -100,7 +100,7 @@ void kfree(void *block_ptr){
 
 	struct block_header *block = (struct block_header *)block_ptr - 1;
 	block->free_flag = 1;
-	//coalescence_adjacent_block(block);
+	coalescence_adjacent_block(block);
 }
 
 static void coalescence_adjacent_block(struct block_header *block){
