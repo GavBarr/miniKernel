@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "../debug/debug.h"
 #include "inode.h"
 #include "superblock.h"
 #include "bitmap.h"
@@ -27,7 +28,7 @@ int inode_write(struct Inode *i, uint32_t inode_number,struct Superblock *s, str
         uint32_t block_number = s->inode_table_block + (inode_byte_offset / s->block_size);
         uint32_t offset_in_block = inode_byte_offset % s->block_size;
 
-	uint8_t block_buf[512];
+	uint8_t block_buf[s->block_size];
 	int read = disk->ops->read_block(disk, block_number, block_buf);
 	if (read != 0) return -1;
 
@@ -36,7 +37,7 @@ int inode_write(struct Inode *i, uint32_t inode_number,struct Superblock *s, str
 		block_buf[offset_in_block + j] = inode_bytes[j];
 	}	
 
-	int written = disk->ops->write_block(disk,block_number,(void *)i);	
+	int written = disk->ops->write_block(disk,block_number,block_buf);	
 	if (written != 0) return -1;
 
 	//fflush(disk);
@@ -52,10 +53,12 @@ int inode_read(struct Inode *i, uint32_t inode_number,struct Superblock *s, stru
 	uint32_t block_number = s->inode_table_block + (inode_byte_offset / s->block_size);
 	uint32_t offset_in_block = inode_byte_offset % s->block_size;
 
-	uint8_t block_buf[512];	
+	uint8_t block_buf[s->block_size];
+		
 	int read = disk->ops->read_block(disk, block_number, block_buf);
 	if (read != 0) return -1;
-
+	
+//	print_string("YO!\n\0");
 	uint8_t *inode_bytes = (uint8_t *)i;
 	for (int j = 0; j < sizeof(struct Inode); j++){
 		inode_bytes[j] = block_buf[offset_in_block + j];

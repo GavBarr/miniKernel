@@ -131,7 +131,7 @@ static void print_device_list(){
 	 	kfree(buf);      
 		return;
 	}
-	temp_cursor_pos = display_vga_text("Devices[ ", 9, temp_cursor_pos, 0x0F);
+	temp_cursor_pos = display_vga_text("Devices[", 8, temp_cursor_pos, 0x0F);
 	uint32_t i = 0;
 	while (buf[i] != '\n'){
 		//change static array to dynamic pointer
@@ -154,8 +154,7 @@ static void print_device_list(){
 			temp_cursor_pos = display_vga_text(" : ", 3, temp_cursor_pos, 0x0F);
 		}
 	}
-	temp_cursor_pos = display_vga_text(" ]", 2, temp_cursor_pos, 0x0F);
-
+        temp_cursor_pos = display_vga_text("] ", 2, temp_cursor_pos, 0x0F);
         kfree(buf);
 }
 

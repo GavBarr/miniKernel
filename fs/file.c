@@ -12,9 +12,6 @@ int file_create(struct Superblock *sb, uint32_t *inode_num, struct Bitmap *b, ui
 
 	uint32_t free_bit = fs_bitmap_find_free(b);
 	if (free_bit == -1) return -1;
-	
-	//print_string("free bit -> \0");
-	//print_int(free_bit);
 	fs_bitmap_set(b, free_bit);
 	struct Inode i;// = kmalloc(sizeof(struct Inode));
 	inode_init(&i);

@@ -124,11 +124,6 @@ static void test_file_ops(uint32_t disk_size, struct block_device *disk){
 	superblock_init(sb, disk_size);
 	fs_bitmap_init(inode_bitmap, 256);
 	fs_bitmap_init(block_bitmap, sb->total_blocks);
-
-	for (uint32_t i = 0; i < sb->data_blocks_start; i++) {
-    		fs_bitmap_set(block_bitmap, i);
-	}
-	sb->free_blocks = sb->total_blocks - sb->data_blocks_start;
 	//create directory testing
 	uint32_t root_inode_num;// = 1;//root exists at inode 1
 	file_create(sb, &root_inode_num, inode_bitmap, 0777, disk);
@@ -148,7 +143,7 @@ static void test_file_ops(uint32_t disk_size, struct block_device *disk){
 	
 	uint32_t mydir_inode_num;
 	print_int(dir_lookup(root_inode_num, "mydir", &mydir_inode_num, sb, disk));
-	file_create_inside_dir(root_inode_num, "test.txt", 0644, inode_bitmap, block_bitmap, sb, disk);
+//	file_create_inside_dir(root_inode_num, "test.txt", 0644, inode_bitmap, block_bitmap, sb, disk);
 
 
 	//file_write(struct Inode *inode, uint32_t inode_num, void *buffer, uint32_t offset, uint32_t size, struct Bitmap *block_bitmap, sb, disk)	

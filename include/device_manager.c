@@ -80,7 +80,6 @@ struct block_device *find_device(char *name){
 		print_string("\n\0");
                 if (strcompare(manager->devices[i]->name, name) != 0) return manager->devices[i];
         }
-	print_string("COULDN'T FIND DEVICE");
 	return NULL;
 	
 }
