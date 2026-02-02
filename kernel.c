@@ -6,6 +6,7 @@
 #include "fs/bitmap.h"
 #include "fs/inode.h"
 #include "fs/file.h"
+#include "fs/fs.h"
 #include "fs/directory.h"
 #include "gdt/gdt.h"
 #include "idt/idt.h"
@@ -47,65 +48,34 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	heap_init();
 	device_manager_init();
 
-	struct block_device *dev = ide_init();
-	int check = register_block_device(dev);
+	fs_init();
+//	print_string(get_current_path());
+	int file_chan = fs_open("/test.txt",0777);
 
-//	struct block_device *dev1 = ramdisk_init();
-//        int check2 = register_block_device(dev1);
+	//char *buf = "Welcome to my kernel!";
+	//fs_write(file_chan, buf, strlength(buf));
+	fs_close(file_chan);	
 
-	test_file_ops(dev->block_size * dev->block_count, dev);
+	file_chan = fs_open("/test.txt", 0777);
+	char *buf2 = kmalloc(512);
+	//fs_read(file_chan, buf2, 512);
 
-	if (debug){
-		uint8_t *buffer = kmalloc(512);
-		print_string(dev->name);
-		print_string("\n\0");
-		for (int i = 0; i < dev->block_size; i++) buffer[i]=1;
+	char *test = get_current_path();
+	//print_string(buf2);
+
+
+	fs_close(file_chan);
+
 	
-		int status = dev->ops->write_block(dev, 2 , buffer);
-		status = dev->ops->write_block(dev, 3 , buffer);
-		status = dev->ops->write_block(dev, 4 , buffer);
-		status = dev->ops->write_block(dev, 500 , buffer);
-
-		if (status != 0){
-			print_string("FAILED WRITE\n\0");
-		}else{
-			print_string("SUCCESSFUL WRITE\n\0");
-		}
-		uint8_t *buffer2 = kmalloc(512);
+//	struct block_device *dev = ide_init();
 
 
-		int status2 = dev->ops->read_block(dev, 500, buffer2);
-		if (status2 != 0){
-			print_string("FAILED WRITE\n\0");
-		}else{
-			print_string("SUCCESSFUL READ\n\0");
-		}
-	
-		for (int i = 0; i < dev->block_size; i++){
-			if(buffer2[i] == 1){
-				//expected value of 1 == success
-				print_string("1 \0");
-				//break;
-			}else{
-				print_string("UNVERIFIED DATA\n\0");
-				break;
-			}
-		}
-		
-
-		int status3 = dev->ops->flush(dev);
-		print_string("\n\0");
+//	struct block_device *dev = ide_init();
+//	int check = register_block_device(dev);
 
 
-		if(status3 == -1){
-			print_string("****FLUSH DEVICE FAIL****\n\0");
-		}else{
-			print_string("****FLUSH DEVICE SUCCESS****");
-		}
+//	test_file_ops(dev->block_size * dev->block_count, dev);
 
-		kfree(buffer);
-		kfree(buffer2);
-	}
 
 	shell_run();
 
@@ -116,6 +86,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 }
 
 static void test_file_ops(uint32_t disk_size, struct block_device *disk){
+	fd_init();
 	struct Superblock *sb = kmalloc(sizeof(struct Superblock));
 	struct Bitmap *inode_bitmap = kmalloc(sizeof(struct Bitmap));
 	struct Bitmap *block_bitmap = kmalloc(sizeof(struct Bitmap));
@@ -147,12 +118,25 @@ static void test_file_ops(uint32_t disk_size, struct block_device *disk){
 	dir_create(root_inode_num, "mydir", 0777, inode_bitmap, block_bitmap, sb, disk);
 	
 	uint32_t mydir_inode_num;
-	print_int(dir_lookup(root_inode_num, "mydir", &mydir_inode_num, sb, disk));
-	file_create_inside_dir(root_inode_num, "test.txt", 0644, inode_bitmap, block_bitmap, sb, disk);
+	dir_lookup(root_inode_num, "mydir", &mydir_inode_num, sb, disk);
 
 
-	//file_write(struct Inode *inode, uint32_t inode_num, void *buffer, uint32_t offset, uint32_t size, struct Bitmap *block_bitmap, sb, disk)	
+	uint32_t path_root_inode_num;
 
+	file_create_inside_dir(mydir_inode_num, "test.txt", 0644, inode_bitmap, block_bitmap, sb, disk);
+
+	path_resolution(root_inode_num, "/mydir", &path_root_inode_num, sb, inode_bitmap, block_bitmap, disk);
+
+	print_string("inode_num->\0");
+	print_int(path_root_inode_num);
+//	char *test_buf = "GAVIN";
+//	struct Inode *test_inode = kmalloc(sizeof(struct Inode));
+//	inode_read(test_inode, mydir_inode_num, sb, disk);
+//	file_write(test_inode, mydir_inode_num, test_buf, 0, strlength(test_buf), block_bitmap, sb, disk);
+//	char *test_buf2 = kmalloc(5);
+//	file_read(test_inode, mydir_inode_num, test_buf2, 0, strlength(test_buf), sb, disk);
+
+//	print_string(test_buf2);
 
 
 }

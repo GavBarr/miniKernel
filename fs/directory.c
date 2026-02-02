@@ -37,7 +37,7 @@ int dir_add_entry(struct Inode *dir_inode, uint32_t dir_inode_num, char *name, u
 
 	struct dir_entry entry;
 	entry.inode_num = inode_num;
-	entry.entry_length = sizeof(struct dir_entry) + strlength(name);
+	entry.entry_length = sizeof(struct dir_entry) + strlength(name) + 1;
 	entry.name_length = strlength(name);
 	entry.file_type = type;
 //	print_string(name);
@@ -48,8 +48,7 @@ int dir_add_entry(struct Inode *dir_inode, uint32_t dir_inode_num, char *name, u
 	//put dir_entry contents into the block + offset
 	if (memcopy(block_buf + offset, &entry, sizeof(struct dir_entry)) != 0) return -1;
 	//now  we add the file name that isn't fixed in size 
-	if (memcopy(block_buf + offset + sizeof(struct dir_entry), name, entry.name_length) != 0) return -1;
-	
+	if (memcopy(block_buf + offset + sizeof(struct dir_entry), name, entry.name_length + 1) != 0) return -1;
 
 	//need to write the block to disk finally
 	disk->ops->write_block(disk, dir_inode->data_blocks[0], block_buf);
@@ -98,7 +97,6 @@ int dir_lookup(uint32_t dir_inode_num,char *name, uint32_t *result_inode_num, st
 		if (entry->name_length == strlength(name)){
 			char *entry_name = (char *)(entry + 1); //name comes after the struct, thuse we need to increment by 1)
 			if (strcompare(entry_name, name)){
-				print_string("WE MADE IT!\n\0");
 				*result_inode_num = entry->inode_num;
 				kfree(dir_inode);
 				return 0;
@@ -111,7 +109,6 @@ int dir_lookup(uint32_t dir_inode_num,char *name, uint32_t *result_inode_num, st
 	}
 
 	kfree(dir_inode);
-	print_string("nothing found\n\0");
 	return -1;
 
 }
@@ -207,7 +204,6 @@ int file_create_inside_dir(uint32_t parent_inode_num, char *name, uint32_t permi
 
         kfree(dir_inode);
         kfree(parent_inode);
-
 
 	//debug_dump_bitmaps(inode_bitmap, block_bitmap);
 

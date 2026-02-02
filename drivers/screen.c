@@ -1,7 +1,9 @@
 #include "../debug/debug.h"
+#include "../fs/fs.h"
 #include "../include/strlength.h"
 #include "../include/strcompare.h"
 #include "../include/device_manager.h"
+#include "../include/memcopy.h"
 #include "../kernel_shell/parser.h"
 #include "../mem_alloc/heap.h"
 #include "keyboard.h"
@@ -13,6 +15,7 @@
 static uint32_t row = 3;
 static uint32_t cursor_pos = 326;
 volatile char *video_cursor = (volatile char *)0xB8000;
+static void display_specs();
 static void print_prompt();
 static void print_command_err();
 static void print_echo_arg(char *arg);
@@ -26,6 +29,7 @@ static uint32_t display_vga_text_single_char(char buffer, uint32_t len, uint32_t
 static void malloc_and_print(char *size);
 static uint32_t convert_char_to_int(char *c);
 static void print_device_list();
+static void print_current_files_in_dir();
 
 void display_character(char character){
 	if (character == '\b'){
@@ -74,6 +78,15 @@ void display_character(char character){
 			kfree(command);
 
 			
+		}else if(strcompare(command, "specs")){
+			kfree(command);
+			clear_screen();
+			display_specs();
+
+		}else if(strcompare(command, "list")){
+			kfree(command);
+			print_current_files_in_dir();
+
 		}else{
 			kfree(command);
 			print_command_err();
@@ -120,6 +133,23 @@ static void print_command_err(){
 
         }
 
+}
+
+static void display_specs(){
+	//print_string();
+}
+
+static void print_current_files_in_dir(){
+	struct files_in_dir *entries = get_files_in_dir();
+	uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
+	int index = 0;
+	while (entries[index].file_name != NULL){
+		temp_cursor_pos = display_vga_text(entries[index].file_name, strlength(entries[index].file_name) + 1, temp_cursor_pos, 0x0E);
+		temp_cursor_pos = display_vga_text_single_char(' ', 1, temp_cursor_pos, 0x0F);
+		index++;
+		
+        }
+	
 }
 
 static void print_device_list(){
@@ -272,6 +302,17 @@ static void print_prompt(){
 	video_cursor[cursor_pos * 2] = 'e';
         video_cursor[cursor_pos * 2 + 1] = PROMPT_COLOR;
         cursor_pos++;
+	video_cursor[cursor_pos * 2] = ':';
+        video_cursor[cursor_pos * 2 + 1] = PROMPT_COLOR;
+        cursor_pos++;
+	
+	char *path = get_current_path();
+	for (int i = 0; i < strlength(path); i++){
+		video_cursor[cursor_pos * 2] = path[i];
+        	video_cursor[cursor_pos * 2 + 1] = PROMPT_COLOR;
+        	cursor_pos++;
+	}
+
 	video_cursor[cursor_pos * 2] = '>';
         video_cursor[cursor_pos * 2 + 1] = PROMPT_COLOR;
         cursor_pos++;
@@ -335,6 +376,7 @@ static char *convert_pointer_to_char_arr(void *ptr){
 static uint32_t display_vga_text(char *buffer, uint32_t len, uint32_t temp_cursor_pos, uint8_t color){
 
 	for (uint32_t i = 0; i < len; i++){
+		if (buffer[i] == '\0') continue;
                 video_cursor[temp_cursor_pos * 2] = buffer[i];
                 video_cursor[temp_cursor_pos * 2 + 1] = color;
                 temp_cursor_pos++;
