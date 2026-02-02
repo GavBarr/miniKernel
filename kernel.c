@@ -51,20 +51,18 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	fs_init();
 //	print_string(get_current_path());
 	int file_chan = fs_open("/test.txt",0777);
-
+	fs_close(file_chan);
 	//char *buf = "Welcome to my kernel!";
 	//fs_write(file_chan, buf, strlength(buf));
-	fs_close(file_chan);	
 
-	file_chan = fs_open("/test.txt", 0777);
-	char *buf2 = kmalloc(512);
-	//fs_read(file_chan, buf2, 512);
 
-	char *test = get_current_path();
 	//print_string(buf2);
 
 
-	fs_close(file_chan);
+	int file_chan2 = fs_open("/hello.txt",0777);
+	fs_close(file_chan2);
+
+	fs_mkdir("/subdir", 0777);
 
 	
 //	struct block_device *dev = ide_init();

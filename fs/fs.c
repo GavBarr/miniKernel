@@ -124,6 +124,33 @@ static void files_in_dir_init(){
 	kfree(inode);
 }
 
+int fs_mkdir(char *path_name, uint32_t flags){
+	
+	uint32_t result_inode_num;      
+        int resolution_status = path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk);
+        if (resolution_status == -1){
+                uint32_t length = 0;
+
+                for (int i = strlength(path_name) - 1; i >= 0; i--){
+                        if (path_name[i] == '/'){
+                                length = strlength(path_name) - i - 1;
+                                break;
+                        }
+                }
+
+                char *dir_name = kmalloc(length + 1);
+                get_file_name(path_name, dir_name, length);
+		if (dir_create(root_inode_num, dir_name, flags, inode_bitmap, block_bitmap,sb,disk) != 0) return -1;
+                //print_string("SUCCESFULLY CREATED FILE!\n\0");
+                if (path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) return -1;
+        }else{
+		return -1;
+	}
+
+	return 0;
+}
+
+
 void fs_init(void){
 //	open_files[MAX_OPEN_FILES] = kmalloc(sizeof(struct open_file_entry) * MAX_OPEN_FILES);
 	current_files_list = kmalloc(sizeof(struct files_in_dir) * MAX_NUMBER_IN_FILES_LIST);

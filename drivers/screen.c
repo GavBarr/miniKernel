@@ -13,7 +13,7 @@
 #define PROMPT_COLOR 0x0B
 
 static uint32_t row = 3;
-static uint32_t cursor_pos = 326;
+static uint32_t cursor_pos = 328;
 volatile char *video_cursor = (volatile char *)0xB8000;
 static void display_specs();
 static void print_prompt();
@@ -86,6 +86,15 @@ void display_character(char character){
 		}else if(strcompare(command, "list")){
 			kfree(command);
 			print_current_files_in_dir();
+
+		}else if(strcompare(command, "touch\0")){
+			uint32_t len = 6;
+                        char *arg = parse_arg(get_keyboard_buffer(), len);
+                        if (arg[0] == '/'){
+				int file_chan = fs_open(arg,0777);
+				kfree(arg);
+			}
+			kfree(command);
 
 		}else{
 			kfree(command);
