@@ -35,6 +35,6 @@ int fs_write(uint32_t entry_index, char *buf, uint32_t size);
 int fs_read(uint32_t entry_index, char *buf, uint32_t size);
 int fd_init(void);
 void fs_init(void);
-
+int fs_change_dir(char *pathname, uint32_t flags);
 
 #endif

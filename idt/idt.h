@@ -22,6 +22,8 @@ struct idt_ptr{
 
 
 void idt_init(void);
+void pit_init();
+uint32_t get_tick_count();
 void idt_set_gate(uint8_t index, uint32_t handler_address, uint16_t selector, uint8_t flags);
 void isr_handler(uint32_t interrupt_number);
 extern void idt_load(uint32_t);

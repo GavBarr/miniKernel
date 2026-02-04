@@ -17,6 +17,8 @@ static uint32_t cursor_pos = 328;
 volatile char *video_cursor = (volatile char *)0xB8000;
 static void display_specs();
 static void print_prompt();
+static void print_invalid_path();
+static int change_directory(char *arg);
 static void print_command_err();
 static void print_echo_arg(char *arg);
 static void print_heap();
@@ -96,6 +98,18 @@ void display_character(char character){
 			}
 			kfree(command);
 
+		}else if (strcompare(command, "cd\0")){
+			kfree(command);
+			uint32_t len = 3;
+                        char *arg = parse_arg(get_keyboard_buffer(), len);
+                        if (arg[0] != '\0'){
+                                int status = change_directory(arg);
+				if (status == -1){
+					print_invalid_path();
+				}
+                        }
+                        if (arg) kfree(arg);
+			
 		}else{
 			kfree(command);
 			print_command_err();
@@ -143,6 +157,21 @@ static void print_command_err(){
         }
 
 }
+
+static void print_invalid_path(){
+        uint32_t buffer_len = cursor_pos - 6;
+        uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
+        char *text = "err: invalid path";
+        uint32_t len = strlength("err: invalid path");
+        for (uint32_t i = 0; i < len; i++){
+                video_cursor[temp_cursor_pos * 2] = text[i];
+                video_cursor[temp_cursor_pos * 2 + 1] = 0xC;
+                temp_cursor_pos++;
+
+        }
+
+}
+
 
 static void display_specs(){
 	//print_string();
@@ -282,6 +311,18 @@ static void print_echo_arg(char *arg){
 	}
 
 }
+
+
+static int change_directory(char *arg){
+        cursor_pos += (80 - (6 + strlength("cd") +strlength(arg)));
+        uint32_t len = strlength(arg);
+	//arg[len] = '\0';
+        if(fs_change_dir(arg, 0777) != 0) return -1;
+
+	return 0;
+
+}
+
 
 static void print_prompt(){
 	

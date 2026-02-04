@@ -50,20 +50,17 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 	fs_init();
 //	print_string(get_current_path());
-	int file_chan = fs_open("/test.txt",0777);
-	fs_close(file_chan);
+//	int file_chan = fs_open("/test.txt",0777);
+//	fs_close(file_chan);
 	//char *buf = "Welcome to my kernel!";
 	//fs_write(file_chan, buf, strlength(buf));
 
 
-	//print_string(buf2);
-
-
-	int file_chan2 = fs_open("/hello.txt",0777);
-	fs_close(file_chan2);
-
 	fs_mkdir("/subdir", 0777);
 
+
+	
+//	print_int(get_tick_count());
 	
 //	struct block_device *dev = ide_init();
 

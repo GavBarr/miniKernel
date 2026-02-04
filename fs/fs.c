@@ -9,6 +9,7 @@
 #include "../debug/debug.h"
 #include "../include/block_device.h"
 #include "../include/strlength.h"
+#include "../include/strcompare.h"
 #include "../mem_alloc/heap.h"
 #include "../include/device_manager.h"
 #include "../include/block_device.h"
@@ -29,7 +30,7 @@ uint32_t root_inode_num;
 struct files_in_dir *current_files_list;  
 
 
-char *current_path = "/";
+char *current_path;
 
 struct open_file_entry open_files[MAX_OPEN_FILES];
 
@@ -42,6 +43,30 @@ struct files_in_dir *get_files_in_dir(){
 	return current_files_list;
 }
 
+int fs_change_dir(char *pathname, uint32_t flags){
+	uint32_t result_inode_num;
+	int status = path_resolution(root_inode_num, pathname, &result_inode_num, sb, inode_bitmap, block_bitmap, disk );
+	if (status != 0) return -1;	
+
+	struct Inode *inode = kmalloc(sizeof(struct Inode));
+        inode_read(inode, result_inode_num, sb, disk);
+                                        
+        if(inode->type != DIR_TYPE) return -1;
+	
+		
+	kfree(current_path);
+	
+	current_path = kmalloc(strlength(pathname) + 1);
+
+	for (int i = 0; i < strlength(pathname); i++){
+		current_path[i] = pathname[i];
+	}
+	current_path[strlength(pathname)] = '\0';
+
+
+	return 0;
+	
+}
 
 
 
@@ -76,11 +101,12 @@ int path_resolution(uint32_t root_inode_num, char *path_name, uint32_t *result_i
 		comp_name[j] = '\0';
 		
 		uint32_t next_inode_num;
+		//if (comp_name[0] == 's') print_string(comp_name);
 		if (dir_lookup(cur_inode_num, comp_name, &next_inode_num, sb, disk) != 0) return -1;
 		cur_inode_num = next_inode_num;
 		current_index = current_index + comp_length + 1;
 	}
-
+		
 	*result_inode_num = cur_inode_num;
 
 	return 0;
@@ -140,13 +166,18 @@ int fs_mkdir(char *path_name, uint32_t flags){
 
                 char *dir_name = kmalloc(length + 1);
                 get_file_name(path_name, dir_name, length);
-		if (dir_create(root_inode_num, dir_name, flags, inode_bitmap, block_bitmap,sb,disk) != 0) return -1;
+		//print_string("dir->\0");
+		//print_string(dir_name);
+		if (dir_create(result_inode_num, dir_name, flags, inode_bitmap, block_bitmap,sb,disk) != 0) return -1;
                 //print_string("SUCCESFULLY CREATED FILE!\n\0");
                 if (path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) return -1;
+		//print_int(result_inode_num);
+		kfree(dir_name);
         }else{
 		return -1;
 	}
-
+	
+	
 	return 0;
 }
 
@@ -154,6 +185,10 @@ int fs_mkdir(char *path_name, uint32_t flags){
 void fs_init(void){
 //	open_files[MAX_OPEN_FILES] = kmalloc(sizeof(struct open_file_entry) * MAX_OPEN_FILES);
 	current_files_list = kmalloc(sizeof(struct files_in_dir) * MAX_NUMBER_IN_FILES_LIST);
+	current_path = kmalloc(2);
+	current_path[0] = '/';
+	current_path[1] = '\0';
+	
 	fd_init();
 	disk = ide_init();
 	register_block_device(disk);

@@ -90,12 +90,24 @@ int dir_lookup(uint32_t dir_inode_num,char *name, uint32_t *result_inode_num, st
 	uint32_t offset = 0;
 	//inode_dump(dir_inode);
 	struct dir_entry *test_entry = (struct dir_entry *)(block_buf);
-	char *test_entry_name = (char *)(test_entry + 1);
+	char *temp_entry_name = (char *)(test_entry + 1);
 	while (offset < dir_inode->size){
 
 		struct dir_entry *entry = (struct dir_entry *)(block_buf + offset);
+		
+		char *temp = (char *)(entry + 1);
+		if (temp[0] == 's'){
+			//print_string("entry->name_length: \0");
+			//print_int(entry->name_length);
+			//print_string("name_length: \0");
+                        //print_int(strlength(name));
+		}
 		if (entry->name_length == strlength(name)){
 			char *entry_name = (char *)(entry + 1); //name comes after the struct, thuse we need to increment by 1)
+			//print_string("entry_name->\0");
+			//print_string(entry_name);
+			//print_string("name->\0");
+                        //print_string(name);
 			if (strcompare(entry_name, name)){
 				*result_inode_num = entry->inode_num;
 				kfree(dir_inode);
@@ -107,7 +119,7 @@ int dir_lookup(uint32_t dir_inode_num,char *name, uint32_t *result_inode_num, st
 		offset += entry->entry_length;
 	
 	}
-
+	
 	kfree(dir_inode);
 	return -1;
 

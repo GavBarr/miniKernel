@@ -5,6 +5,7 @@
 
 struct idt_ptr i_ptr;
 struct idt_entry idt[256];
+static uint32_t tick_count = 0;
 
 extern void isr0(void);
 extern void isr1(void);
@@ -116,10 +117,30 @@ void idt_init(void){
 
 	i_ptr.limit = sizeof(idt) -1;
 	i_ptr.base = (uint32_t)&idt;
-
+	
 	idt_load((uint32_t)&i_ptr);
 
+	pit_init();
 	__asm__ volatile("sti");
+}
+
+uint32_t get_tick_count(){
+	return tick_count;
+}
+
+void pit_init(){
+	//0X40 channel 0 data port
+	//0x41 channel 1 data port
+	//0x42 channel 2 data port
+	//0x43 command register
+
+	//set the mode
+	outb(0x43, 0x36); //set to lobyte access , Mode 3 square wave)
+	
+	uint16_t divisor = 11931; //100Hz
+	outb(0x40, divisor & 0xFF); //low byte
+	//set frequency
+	outb(0x40, (divisor >> 8) & 0xFF);//high byte
 }
 
 void idt_set_gate(uint8_t index, uint32_t handler_address, uint16_t selector, uint8_t flags){
@@ -158,6 +179,8 @@ void isr_handler(uint32_t interrupt_number){
 
 			__asm__ volatile("hlt");
 		}
+	}if(interrupt_number == 32){
+		tick_count++;	
 	}if (interrupt_number == 33) {
                 keyboard_handler();
         }
