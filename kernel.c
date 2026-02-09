@@ -21,6 +21,7 @@
 #include "paging/paging.h"
 #include "debug/debug.h"
 #include "kernel_shell/shell.h"
+#include "include/kernel/sched.h"
 
 #define FILE_TYPE 0
 #define DIR_TYPE 1
@@ -49,6 +50,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	device_manager_init();
 
 	fs_init();
+	scheduler_init();
 //	print_string(get_current_path());
 //	int file_chan = fs_open("/test.txt",0777);
 //	fs_close(file_chan);
@@ -56,7 +58,10 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	//fs_write(file_chan, buf, strlength(buf));
 
 
-	fs_mkdir("/subdir", 0777);
+	fs_mkdir("/home", 0777);
+	fs_mkdir("/tmp", 0777);
+	fs_mkdir("/etc", 0777);
+	fs_mkdir("/bin", 0777);
 
 
 	
