@@ -37,8 +37,9 @@ struct task{
 	
 };
 
-void task_init(void);
 struct task *task_create(void (*entry_point)(void));
-void schedule(void);
-
+int task_destroy(struct task *task);
+int task_set_state(task_state state);
+task_state task_get_state(void);
+void print_task(struct task *task);
 #endif

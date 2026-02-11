@@ -22,6 +22,8 @@
 #include "debug/debug.h"
 #include "kernel_shell/shell.h"
 #include "include/kernel/sched.h"
+#include "include/kernel/task.h"
+#include "include/kernel/sched.h"
 
 #define FILE_TYPE 0
 #define DIR_TYPE 1
@@ -31,6 +33,13 @@ static uint32_t debug = 0;
 static void test_file_ops(uint32_t disk_size, struct block_device *disk);
 static void inode_dump(struct Inode *inode);
 static void debug_dump_bitmaps(struct Bitmap *inode_bitmap, struct Bitmap *block_bitmap);
+static void idle_task_function(void);
+static void idle_task_function(void){
+        while (1){
+                __asm__ volatile("hlt");
+        }
+}
+
 
 void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 //	if (magic != 0x2BADB002){
@@ -51,6 +60,10 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 	fs_init();
 	scheduler_init();
+
+	struct task *temp_task = task_create(idle_task_function);
+	struct task *temp_task2 = task_create(idle_task_function);
+	print_task(temp_task2);
 //	print_string(get_current_path());
 //	int file_chan = fs_open("/test.txt",0777);
 //	fs_close(file_chan);

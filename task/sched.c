@@ -24,13 +24,32 @@ int next_pid;
 
 static void task_init_stack(struct task *task, void (*entry_point)(void));
 static void idle_task_function(void);
-extern void save_current_registers();
 
 static void idle_task_function(void){
 	while (1){
 		__asm__ volatile("hlt");
 	}
 }
+
+/* schedules the next task accordingly to the queue
+*/
+void schedule(void){
+	if (ready_queue.count == 0) return;
+
+	//if the state is TASK_READY then we need to schedule that as the next task
+	//to run, otherwise go down the queue further		if (ready_queue.head == NULL) return;
+	if (ready_queue.head->state == 0){
+		current_task = ready_queue.head;
+		ready_queue.head = current_task->next;
+		return;	
+	}
+		
+
+	return;
+	
+}
+
+
 
 void scheduler_init(void){
 	
@@ -59,7 +78,7 @@ void scheduler_init(void){
 	task_init_stack(idle_task, idle_task_function);
 
 	current_task = idle_task;
-
+	
 
 			
 }
