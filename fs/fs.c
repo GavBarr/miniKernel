@@ -79,6 +79,7 @@ int path_resolution(uint32_t root_inode_num, char *path_name, uint32_t *result_i
 	uint32_t total_path_length = strlength(path_name);
 	uint32_t current_index = 1; //not the first / after
 
+
 	//uint32_t num_components = find_number_of_components(path_name);
 	//if(num_components == 0) return -1;
 	uint32_t cur_inode_num = root_inode_num;
@@ -99,6 +100,7 @@ int path_resolution(uint32_t root_inode_num, char *path_name, uint32_t *result_i
 
 		}
 		comp_name[j] = '\0';
+
 		
 		uint32_t next_inode_num;
 		//if (comp_name[0] == 's') print_string(comp_name);
@@ -154,6 +156,7 @@ int fs_mkdir(char *path_name, uint32_t flags){
 	
 	uint32_t result_inode_num;      
         int resolution_status = path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk);
+	
         if (resolution_status == -1){
                 uint32_t length = 0;
 
@@ -166,12 +169,9 @@ int fs_mkdir(char *path_name, uint32_t flags){
 
                 char *dir_name = kmalloc(length + 1);
                 get_file_name(path_name, dir_name, length);
-		//print_string("dir->\0");
-		//print_string(dir_name);
-		if (dir_create(result_inode_num, dir_name, flags, inode_bitmap, block_bitmap,sb,disk) != 0) return -1;
-                //print_string("SUCCESFULLY CREATED FILE!\n\0");
+		
+		if (dir_create(root_inode_num, dir_name, flags, inode_bitmap, block_bitmap,sb,disk) != 0) return -1;
                 if (path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) return -1;
-		//print_int(result_inode_num);
 		kfree(dir_name);
         }else{
 		return -1;

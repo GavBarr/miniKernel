@@ -33,11 +33,11 @@ static uint32_t debug = 0;
 static void test_file_ops(uint32_t disk_size, struct block_device *disk);
 static void inode_dump(struct Inode *inode);
 static void debug_dump_bitmaps(struct Bitmap *inode_bitmap, struct Bitmap *block_bitmap);
-static void idle_task_function(void);
-static void idle_task_function(void){
-        while (1){
-                __asm__ volatile("hlt");
-        }
+static void test_task_function(void);
+static void test_task_function(void){
+
+	print_string("PRINTING FROM MY TASK!\0");
+
 }
 
 
@@ -61,22 +61,34 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	fs_init();
 	scheduler_init();
 
-	struct task *temp_task = task_create(idle_task_function);
-	struct task *temp_task2 = task_create(idle_task_function);
-	print_task(temp_task2);
+	//display_registers();
+
+//	struct task *temp_task = task_create(test_task_function);
+//	struct task *temp_task2 = task_create(test_task_function);
+	//print_task(temp_task2);
 //	print_string(get_current_path());
 //	int file_chan = fs_open("/test.txt",0777);
 //	fs_close(file_chan);
-	//char *buf = "Welcome to my kernel!";
-	//fs_write(file_chan, buf, strlength(buf));
+//	char *buf = "Welcome to my kernel!";
+//	fs_write(file_chan, buf, strlength(buf));
 
+//	fs_close(file_chan);
+	
+//	file_chan = fs_open("/test.txt", 0777);
+//	char *buf2 = kmalloc(512);
+//	fs_read(file_chan, buf2, strlength(buf));
+	
+//	print_string(buf2);
+//	fs_close(file_chan);	
+	
+	
 
 	fs_mkdir("/home", 0777);
 	fs_mkdir("/tmp", 0777);
 	fs_mkdir("/etc", 0777);
 	fs_mkdir("/bin", 0777);
 
-
+//	fs_mkdir("/home/gavin", 0777);
 	
 //	print_int(get_tick_count());
 	
@@ -90,7 +102,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 //	test_file_ops(dev->block_size * dev->block_count, dev);
 
 
-	shell_run();
+//	shell_run();
 
 	while(1){
 		

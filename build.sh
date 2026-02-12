@@ -6,6 +6,7 @@ rm -f *.o kernel.bin mykernel.iso
 nasm -f elf32 start.asm -o start.o
 nasm -f elf32 gdt/gdt_flush.asm -o gdt/gdt_flush.o
 nasm -f elf32 idt/isr.asm -o idt/isr_stubs.o
+nasm -f elf32 task/switch.asm -o task/switch.o
 
 echo "Compiling..."
 CFLAGS="-m32 -ffreestanding -nostdlib -fno-pie"
@@ -42,7 +43,7 @@ gcc $CFLAGS -c task/task.c      -o task/task.o
 echo "Linking..."
 ld -m elf_i386 -T linker.ld \
   -o kernel.bin \
-  start.o kernel.o gdt/gdt.o gdt/gdt_flush.o idt/idt.o idt/isr_stubs.o \
+  start.o kernel.o gdt/gdt.o gdt/gdt_flush.o idt/idt.o idt/isr_stubs.o task/switch.o\
   drivers/keyboard.o drivers/screen.o drivers/ramdisk.o drivers/ide_ata_driver.o  kernel_shell/parser.o \
   fs/superblock.o fs/bitmap.o fs/file.o fs/inode.o fs/directory.o fs/fs.o\
   mem_alloc/mm.o mem_alloc/mem_alloc.o mem_alloc/bitmap.o \

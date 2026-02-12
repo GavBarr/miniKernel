@@ -1,3 +1,4 @@
+#include "../debug/debug.h"
 #include "../include/kernel/sched.h"
 #include "../include/kernel/task.h"
 #include "../include/kernel/config.h"
@@ -14,7 +15,8 @@
 
 };
 */
-
+static int debug = 0;
+extern void context_switch(cpu_context *old, cpu_context *new);
 
 struct task_queue ready_queue;
 struct task_queue blocked_queue;
@@ -26,22 +28,114 @@ static void task_init_stack(struct task *task, void (*entry_point)(void));
 static void idle_task_function(void);
 
 static void idle_task_function(void){
+//	print_string("IDLE TASK FUNCTION\n\0");
 	while (1){
 		__asm__ volatile("hlt");
 	}
 }
 
+void switch_task(struct task *old, struct task *new){
+	if (debug){
+		print_string("*old*\n\0");
+	//print_pointer(old->context);
+	//print_pointer(new->context);
+		print_string("edi->\0");
+		print_int(old->context->edi);
+		print_string("\n\0");
+		print_string("esi->\0");
+	        print_int(old->context->esi);
+	        print_string("\n\0");
+		print_string("ebx->\0");
+	        print_int(old->context->ebx);
+	        print_string("\n\0");
+		print_string("ebp->\0");
+	        print_int(old->context->ebp);
+	        print_string("\n\0");
+		print_string("eip->\0");
+	        print_pointer((void *)old->context->eip);
+	        print_string("\n\0");
+		print_string("esp->\0");
+	        print_pointer((void *)old->context->esp);
+	        print_string("\n\0");
+
+		print_string("*new*\n\0");
+	        print_string("edi->\0");
+	       	print_int(new->context->edi);
+	        print_string("\n\0");
+	        print_string("esi->\0");
+	        print_int(new->context->esi);
+	        print_string("\n\0");
+	        print_string("ebx->\0");
+	        print_int(new->context->ebx);
+	        print_string("\n\0");
+	        print_string("ebp->\0");
+	        print_int(new->context->ebp);
+	        print_string("\n\0");
+	        print_string("eip->\0");
+	        print_pointer((void *)new->context->eip);
+	        print_string("\n\0");
+	        print_string("esp->\0");
+	        print_pointer((void *)new->context->esp);
+	        print_string("\n\0");
+	}
+
+	context_switch(old->context, new->context);
+}
+
+void task_wrapper() {
+	current_task->entry_point();
+	exit_task();
+}
+
+void exit_task(){
+	current_task->state = TASK_ZOMBIE;
+	//ready_queue.count--;
+	//print_string("schedule()\n\0");
+	schedule();
+}
+
+void enqueue_task(struct task *task){
+
+	if (ready_queue.count == 0){
+		ready_queue.head = task;
+		ready_queue.tail = task;
+	}else{
+		//struct task *old_task = (struct task *)ready_queue.tail;
+		ready_queue.tail->next = task;	
+		task->prev = ready_queue.tail;
+		ready_queue.tail = task;
+	}
+	ready_queue.count++;
+}
+
 /* schedules the next task accordingly to the queue
 */
 void schedule(void){
-	if (ready_queue.count == 0) return;
+	//print_int(ready_queue.count);
+	if (ready_queue.count == 0){
+		if (current_task != idle_task){
+			struct task *old_task = current_task;
+			current_task = idle_task;
+			//print_string("idle_task\n\0");
+			switch_task(old_task, idle_task);
+		}
+		return;
+	}
+	//print_int(current_task->pid);
+	//print_int(ready_queue.head->pid);
 
 	//if the state is TASK_READY then we need to schedule that as the next task
 	//to run, otherwise go down the queue further		if (ready_queue.head == NULL) return;
-	if (ready_queue.head->state == 0){
-		current_task = ready_queue.head;
+	if (ready_queue.head->state == TASK_READY){
+		struct task *new_task = ready_queue.head;
 		ready_queue.head = current_task->next;
-		return;	
+		ready_queue.count--;
+		
+		struct task *old_task = current_task;
+		old_task->state = TASK_READY;	
+		current_task = new_task;
+                current_task->state = TASK_RUNNING;
+		switch_task(old_task, new_task);
 	}
 		
 
@@ -74,12 +168,11 @@ void scheduler_init(void){
 	idle_task->parent = NULL;
 	idle_task->next = NULL;
 	idle_task->prev = NULL;
-
+	idle_task->entry_point = idle_task_function;
 	task_init_stack(idle_task, idle_task_function);
 
 	current_task = idle_task;
 	
-
 			
 }
 
@@ -102,10 +195,9 @@ static void task_init_stack(struct task *task, void (*entry_point)(void)){
 	context->ebx = 0;
 	context->ebp = 0;
 	context->eip = (uint32_t)entry_point; //this will be at the top of the stack, and will be executed as soon as RET happens
-
+	context->esp = stack_top;
 	
 	task->context = context;
-	task->esp = (uint32_t)context;
 	
 
 }
@@ -115,6 +207,27 @@ static void task_init_stack(struct task *task, void (*entry_point)(void)){
 
 
 
+static inline void outb(uint16_t port, uint8_t value){
+        //porting I/O
+
+        //assembly instructions ot put value into AL register and put port into DX register
+        __asm__ volatile ("outb %0, %1"
+                          :
+                          : "a"(value),"Nd"(port)
+                          );
+
+}
+
+static inline uint8_t inb(uint16_t port){
+        uint8_t return_val;
+
+        __asm__ volatile ("inb %1, %0"
+                         : "=a"(return_val)
+                         : "Nd"(port)
+                         );
+
+        return return_val;
+}
 
 
 

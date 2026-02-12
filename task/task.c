@@ -33,9 +33,9 @@ void print_task(struct task *task){
 	print_string("prev->\0");
         print_pointer(task->prev);
         print_string("\n\0");
-	print_string("esp->\0");
-        print_pointer((uint32_t *)task->esp);
-        print_string("\n\0");
+//	print_string("esp->\0");
+//        print_pointer((uint32_t *)task->esp);
+//        print_string("\n\0");
 }
 
 struct task *task_create(void (*entry_point)(void)){
@@ -49,6 +49,7 @@ struct task *task_create(void (*entry_point)(void)){
 	new_task->parent = NULL;
 	new_task->next = NULL;
 	new_task->prev = NULL;
+	new_task->entry_point = entry_point;
 
 	uint32_t stack_top = new_task->kernel_stack + KERNEL_STACK_SIZE;
 	stack_top -= sizeof(cpu_context);
@@ -59,10 +60,12 @@ struct task *task_create(void (*entry_point)(void)){
 	context->esi = 0;
 	context->ebx = 0;
 	context->ebp = 0;
-	context->eip = (uint32_t)entry_point;
+	context->eip = (uint32_t)task_wrapper;
+	context->esp = stack_top;
+
 
 	new_task->context = context;
-	new_task->esp = (uint32_t)context;
+	enqueue_task(new_task); //need to put this task 
 	
 	return new_task;
 }
@@ -73,8 +76,16 @@ int task_destroy(struct task *task){
 
 	return 0;
 }
-int task_set_state(task_state state);
-task_state task_get_state(void);
+int task_set_state(struct task *task ,task_state state){
+	
+	task->state = state;
+	return 0;
+}
+task_state task_get_state(struct task *task){
+	
+	return task->state;
+	
+}
 
 
 static int get_next_pid(){

@@ -2,6 +2,7 @@
 #include "../drivers/keyboard.h"
 #include "../drivers/ide_ata_driver.h"
 #include "../debug/debug.h"
+#include "../include/kernel/sched.h"
 
 struct idt_ptr i_ptr;
 struct idt_entry idt[256];
@@ -180,7 +181,8 @@ void isr_handler(uint32_t interrupt_number){
 			__asm__ volatile("hlt");
 		}
 	}if(interrupt_number == 32){
-		tick_count++;	
+		tick_count++;
+		schedule();	
 	}if (interrupt_number == 33) {
                 keyboard_handler();
         }

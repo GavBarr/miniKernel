@@ -1,3 +1,13 @@
-this is a test
+Blocked Queue
+
+
+Ready Queue
+
+head <- task A -> tail
+	|
+	next -> NULL
+	prev -> NULL
+
+
 
 
