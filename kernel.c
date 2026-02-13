@@ -84,11 +84,11 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	
 
 	fs_mkdir("/home", 0777);
-	fs_mkdir("/tmp", 0777);
-	fs_mkdir("/etc", 0777);
-	fs_mkdir("/bin", 0777);
+//	fs_mkdir("/tmp", 0777);
+//	fs_mkdir("/etc", 0777);
+//	fs_mkdir("/bin", 0777);
 
-//	fs_mkdir("/home/gavin", 0777);
+	fs_mkdir("/home/gavin", 0777);
 	
 //	print_int(get_tick_count());
 	
@@ -102,7 +102,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 //	test_file_ops(dev->block_size * dev->block_count, dev);
 
 
-//	shell_run();
+	shell_run();
 
 	while(1){
 		

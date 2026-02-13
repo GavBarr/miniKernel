@@ -158,6 +158,9 @@ int fs_mkdir(char *path_name, uint32_t flags){
         int resolution_status = path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk);
 	
         if (resolution_status == -1){
+		//by default result_inode_num should be the root inode num, unless changed later when resolving a nested dir
+		result_inode_num = root_inode_num;
+		
                 uint32_t length = 0;
 
                 for (int i = strlength(path_name) - 1; i >= 0; i--){
@@ -166,11 +169,54 @@ int fs_mkdir(char *path_name, uint32_t flags){
                                 break;
                         }
                 }
-
-                char *dir_name = kmalloc(length + 1);
-                get_file_name(path_name, dir_name, length);
 		
-		if (dir_create(root_inode_num, dir_name, flags, inode_bitmap, block_bitmap,sb,disk) != 0) return -1;
+		int num_components = find_number_of_components(path_name);
+                char *dir_name = kmalloc(strlength(path_name));//(length + 1);
+		char *tmp_full_path_name = kmalloc(strlength(path_name) + 1);
+		
+		for (int ind = 0; ind < strlength(path_name); ind++){
+			tmp_full_path_name[ind] = path_name[ind];
+		}
+		tmp_full_path_name[strlength(path_name)] = '\0';
+		
+		int cur_index = 1;
+		for (int comp = 0; comp < num_components; comp++){
+
+			int offset = 0;
+			int len = 0;
+			for(int i = 0; i < strlength(path_name); i++){
+				if (path_name[i] == '/') offset++;
+				if (offset > comp + 1) break;
+				len++;	
+			
+			}
+
+			char *tmp_name = kmalloc(len + 1);
+                	tmp_name[len] = '\0';
+
+			for (int i = 0; i < len; i++){
+				tmp_name[i] = path_name[i];
+				
+			}
+			print_string(tmp_name);
+			print_string("YO\n\0");	
+			
+			uint32_t tmp_inode_num;
+			if (path_resolution(root_inode_num, tmp_name, &tmp_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) break;
+			result_inode_num = tmp_inode_num;
+		}
+
+		//if (result_inode_)
+		//print_string("inode->\0");
+		//print_int(result_inode_num);	
+		//print_string("\n\0");
+
+		//print_string("dir_name->\0");
+		//print_string(dir_name);
+		//print_string("\n\0");		
+
+
+		if (dir_create(result_inode_num, dir_name, flags, inode_bitmap, block_bitmap,sb,disk) != 0) return -1;
                 if (path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) return -1;
 		kfree(dir_name);
         }else{
