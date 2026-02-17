@@ -111,7 +111,6 @@ void enqueue_task(struct task *task){
 /* schedules the next task accordingly to the queue
 */
 void schedule(void){
-	//print_int(ready_queue.count);
 	if (ready_queue.count == 0){
 		if (current_task != idle_task){
 			struct task *old_task = current_task;

@@ -59,11 +59,11 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	device_manager_init();
 
 	fs_init();
-//	scheduler_init();
+	scheduler_init();
 
 	//display_registers();
 
-//	struct task *temp_task = task_create(test_task_function);
+	struct task *temp_task = task_create(test_task_function);
 //	struct task *temp_task2 = task_create(test_task_function);
 	//print_task(temp_task2);
 	
@@ -74,29 +74,12 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 	fs_mkdir("/etc", 0777);
 	fs_mkdir("/bin", 0777);
 
-	fs_mkdir("/home/gavin", 0777);
-	fs_mkdir("/home/gavin/tmp", 0777);
+//	fs_mkdir("/home/gavin", 0777);
+//	fs_mkdir("/home/gavin/tmp", 0777);
 
 	int file_chan = fs_open("/test.txt", 0777);
-//	print_int(file_chan);
-//	get_open_files();	
-//	print_string("\n\0");
-//	print_string("file_chan->\0");
-//	print_int(0);	
-	struct open_file_entry *files;// = kmalloc(sizeof(struct open_file_entry));		
-	files = get_open_files();
-//	int file_chan2 = fs_open("/home/test.txt", 0777);	
-//	fs_close(file_chan);
-//	print_int(get_tick_count());
+	fs_close(file_chan);
 	
-//	struct block_device *dev = ide_init();
-
-
-//	struct block_device *dev = ide_init();
-//	int check = register_block_device(dev);
-
-
-//	test_file_ops(dev->block_size * dev->block_count, dev);
 
 
 	shell_run();

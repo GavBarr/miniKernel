@@ -178,7 +178,7 @@ int fs_mkdir(char *path_name, uint32_t flags){
                 }
 		
 		int num_components = find_number_of_components(path_name);
-                char dir_name[length + 1]; //= kmalloc(length + 1);
+                char *dir_name = kmalloc(length + 1);//[length + 1]; //= kmalloc(length + 1);
 		
 		int start_index = strlength(path_name) - length;
 		int j = 0;
@@ -188,6 +188,8 @@ int fs_mkdir(char *path_name, uint32_t flags){
 			j++;
                 }
 		dir_name[length] = '\0';
+		
+		
 
 		for (int comp = 0; comp < num_components; comp++){
 
@@ -200,7 +202,7 @@ int fs_mkdir(char *path_name, uint32_t flags){
 			
 			}
 
-			char tmp_path_name[len + 1];
+			char *tmp_path_name = kmalloc(len + 1);//[len + 1];
 
 			for(int i = 0; i < len; i++){
 				tmp_path_name[i] = path_name[i];
@@ -209,15 +211,33 @@ int fs_mkdir(char *path_name, uint32_t flags){
 			tmp_path_name[len] = '\0';
 			
 			uint32_t tmp_inode_num;
-			if (path_resolution(root_inode_num, tmp_path_name, &tmp_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) break;
+
+
+			if (path_resolution(root_inode_num, tmp_path_name, &tmp_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1){
+				kfree(tmp_path_name);
+				break;
+			}
 			result_inode_num = tmp_inode_num;
+			kfree(tmp_path_name);
 		}
 
 
 		// /home 1 component
-		if (dir_create(result_inode_num, dir_name, flags, inode_bitmap, block_bitmap,sb,disk) != 0) return -1;
-                if (path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) return -1;
-		//kfree(dir_name);
+		if (dir_create(result_inode_num, dir_name, flags, inode_bitmap, block_bitmap,sb,disk) != 0){
+			kfree(dir_name);
+			return -1;
+		}
+
+                if (path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1){
+			kfree(dir_name);
+			return -1;
+		}
+		if (num_components > 1){
+                        print_string("return early\n\0");
+                }
+
+
+		kfree(dir_name);
         }else{
 		return -1;
 	}
@@ -332,7 +352,6 @@ int fs_open(char *path_name, uint32_t flags){
 			open_files[i].flags = 0777;
 			open_files[i].in_use = 1; 
 			//kfree(inode);		
-			print_string("\n\0");		
 			print_string("open_files_index->\0");		
 			print_int(i);
 			return i;	

@@ -183,7 +183,7 @@ void isr_handler(uint32_t interrupt_number){
 		}
 	}if(interrupt_number == 32){
 		tick_count++;
-		//schedule();	
+		schedule();	
 	}if (interrupt_number == 33) {
                 keyboard_handler();
         }
