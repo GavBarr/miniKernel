@@ -5,6 +5,19 @@ The project focuses on understanding how an OS works from the ground up, includi
 
 ---
 
+### Current State
+- GDT (✓)
+- Interrupts (✓)
+- Virtual Memory (✓)
+- Memory Allocation (✓)
+- Block Device Interface (✓)
+- ATA Driver Implemented (✓)
+- Kernel Shell (✓)
+- Ext2 Filesystem (*works but in progress*)
+- Scheduler (*in progress*)
+
+---
+
 ### Project Goals
 - Learn x86 kernel development from scratch
 - Gain deeper experience with C and Assembly
