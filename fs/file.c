@@ -15,7 +15,7 @@ int file_create(struct Superblock *sb, uint32_t *inode_num, struct Bitmap *b, ui
 	fs_bitmap_set(b, free_bit);
 	struct Inode i;// = kmalloc(sizeof(struct Inode));
 	inode_init(&i);
-
+	
 	if (inode_write(&i, free_bit, sb, disk) != 0) return -1;
 	sb->free_inodes--;
 	if(superblock_write(disk, sb) != 0) return -1;

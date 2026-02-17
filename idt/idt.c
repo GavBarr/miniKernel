@@ -175,6 +175,7 @@ void isr_handler(uint32_t interrupt_number){
 		__asm__ volatile("mov %%cr2, %0" : "=r"(fault_addr));
 		print_string("---PAGE FAULT---\n\0");
 		print_pointer((void *)fault_addr);
+		display_registers();
 
 		while(1){
 
@@ -182,7 +183,7 @@ void isr_handler(uint32_t interrupt_number){
 		}
 	}if(interrupt_number == 32){
 		tick_count++;
-		schedule();	
+		//schedule();	
 	}if (interrupt_number == 33) {
                 keyboard_handler();
         }

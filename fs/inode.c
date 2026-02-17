@@ -35,7 +35,8 @@ int inode_write(struct Inode *i, uint32_t inode_number,struct Superblock *s, str
 	uint8_t *inode_bytes = (uint8_t *)i;
 	for (int j = 0; j < sizeof(struct Inode); j++){
 		block_buf[offset_in_block + j] = inode_bytes[j];
-	}	
+	}
+	
 
 	int written = disk->ops->write_block(disk,block_number,block_buf);	
 	if (written != 0) return -1;

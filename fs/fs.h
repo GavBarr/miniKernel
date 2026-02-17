@@ -25,6 +25,7 @@ struct files_in_dir{
 //	struct open_file_entry[MAX_OPEN_FILES];
 //};
 
+struct open_file_entry *get_open_files(void);
 char *get_current_path();
 struct files_in_dir *get_files_in_dir();
 int path_resolution(uint32_t root_inode_num, char *path_name, uint32_t *result_inode_num, struct Superblock *sb, struct Bitmap *inode_bitmap, struct Bitmap *block_bitmap, struct block_device *disk);

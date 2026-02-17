@@ -166,6 +166,7 @@ void print_pointer(void *ptr){
 
 
 void print_int(uint32_t n) {
+
     char buffer[11]; // max 10 digits for 32-bit + null
     buffer[10] = '\0';
 

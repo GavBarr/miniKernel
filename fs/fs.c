@@ -32,7 +32,11 @@ struct files_in_dir *current_files_list;
 
 char *current_path;
 
-struct open_file_entry open_files[MAX_OPEN_FILES];
+struct open_file_entry *open_files;//[MAX_OPEN_FILES];
+
+struct open_file_entry *get_open_files(void){
+	return open_files;
+}
 
 char *get_current_path(){
 	files_in_dir_init();	
@@ -115,13 +119,16 @@ int path_resolution(uint32_t root_inode_num, char *path_name, uint32_t *result_i
 }
 
 int fd_init(void){
+	open_files = kmalloc(sizeof(struct open_file_entry) * MAX_OPEN_FILES);
+//	print_string("open_files->\0");
+//	print_pointer(open_files);
 	for (int i = 0; i < MAX_OPEN_FILES; i++){
-		struct open_file_entry entry = (struct open_file_entry)open_files[i];
-		entry.inode_num = -1;
-		entry.offset = 0;
-		entry.flags = 0777;
-		entry.in_use = 0;	
+		open_files[i].inode_num = -1;
+		open_files[i].offset = 0;
+		open_files[i].flags = 0777;
+		open_files[i].in_use = 0;	
 	}
+	return 0;
 }
 
 static void files_in_dir_init(){
@@ -149,7 +156,7 @@ static void files_in_dir_init(){
 			offset += entry->entry_length;
 		}
 
-	kfree(inode);
+	//kfree(inode);
 }
 
 int fs_mkdir(char *path_name, uint32_t flags){
@@ -171,15 +178,17 @@ int fs_mkdir(char *path_name, uint32_t flags){
                 }
 		
 		int num_components = find_number_of_components(path_name);
-                char *dir_name = kmalloc(strlength(path_name));//(length + 1);
-		char *tmp_full_path_name = kmalloc(strlength(path_name) + 1);
+                char dir_name[length + 1]; //= kmalloc(length + 1);
 		
-		for (int ind = 0; ind < strlength(path_name); ind++){
-			tmp_full_path_name[ind] = path_name[ind];
-		}
-		tmp_full_path_name[strlength(path_name)] = '\0';
-		
-		int cur_index = 1;
+		int start_index = strlength(path_name) - length;
+		int j = 0;
+		for (int i = start_index; i < start_index + length; i++){
+                        if (path_name[i] == '/') break;
+			dir_name[j] = path_name[i];
+			j++;
+                }
+		dir_name[length] = '\0';
+
 		for (int comp = 0; comp < num_components; comp++){
 
 			int offset = 0;
@@ -191,34 +200,24 @@ int fs_mkdir(char *path_name, uint32_t flags){
 			
 			}
 
-			char *tmp_name = kmalloc(len + 1);
-                	tmp_name[len] = '\0';
+			char tmp_path_name[len + 1];
 
-			for (int i = 0; i < len; i++){
-				tmp_name[i] = path_name[i];
-				
+			for(int i = 0; i < len; i++){
+				tmp_path_name[i] = path_name[i];
 			}
-			print_string(tmp_name);
-			print_string("YO\n\0");	
+
+			tmp_path_name[len] = '\0';
 			
 			uint32_t tmp_inode_num;
-			if (path_resolution(root_inode_num, tmp_name, &tmp_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) break;
+			if (path_resolution(root_inode_num, tmp_path_name, &tmp_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) break;
 			result_inode_num = tmp_inode_num;
 		}
 
-		//if (result_inode_)
-		//print_string("inode->\0");
-		//print_int(result_inode_num);	
-		//print_string("\n\0");
 
-		//print_string("dir_name->\0");
-		//print_string(dir_name);
-		//print_string("\n\0");		
-
-
+		// /home 1 component
 		if (dir_create(result_inode_num, dir_name, flags, inode_bitmap, block_bitmap,sb,disk) != 0) return -1;
                 if (path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) return -1;
-		kfree(dir_name);
+		//kfree(dir_name);
         }else{
 		return -1;
 	}
@@ -272,6 +271,7 @@ int fs_open(char *path_name, uint32_t flags){
 	uint32_t result_inode_num;	
 	int resolution_status = path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk);
 	if (resolution_status == -1){
+		result_inode_num = root_inode_num;
 		uint32_t length = 0;
 
         	for (int i = strlength(path_name) - 1; i >= 0; i--){
@@ -281,13 +281,39 @@ int fs_open(char *path_name, uint32_t flags){
                 	}
         	}
 
-		char *file_name = kmalloc(length + 1);
+		char file_name[length + 1];
 	        get_file_name(path_name, file_name, length);
+
+		int num_components = find_number_of_components(path_name);
+                file_name[length] = '\0';
+                for (int comp = 0; comp < num_components; comp++){
+
+                        int offset = 0;
+                        int len = 0;
+                        for(int i = 0; i < strlength(path_name); i++){
+                                if (path_name[i] == '/') offset++;
+                                if (offset > comp + 1) break;
+                                len++;
+
+                        }
+
+                        char tmp_path_name[len + 1];
+
+                        for(int i = 0; i < len; i++){
+                                tmp_path_name[i] = path_name[i];
+                        }
+
+                        tmp_path_name[len] = '\0';
+
+                        uint32_t tmp_inode_num;
+                        if (path_resolution(root_inode_num, tmp_path_name, &tmp_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) break;
+                        result_inode_num = tmp_inode_num;
+                }
+
+		
 		
 		//print_string(file_name);
-		if (file_create_inside_dir(root_inode_num, file_name, 0777, inode_bitmap, block_bitmap, sb, disk) != 0) return -1;
-		
-		//print_string("SUCCESFULLY CREATED FILE!\n\0");
+		if (file_create_inside_dir(result_inode_num, file_name, 0777, inode_bitmap, block_bitmap, sb, disk) != 0) return -1;
 		if (path_resolution(root_inode_num, path_name, &result_inode_num, sb, inode_bitmap, block_bitmap, disk) == -1) return -1;
 	}
 
@@ -299,12 +325,16 @@ int fs_open(char *path_name, uint32_t flags){
 
 	//VALIDATE ACCESS TODO
 	for(int i = 0; i < MAX_OPEN_FILES; i++){
+
 		if (open_files[i].in_use == 0){
 			open_files[i].inode_num = result_inode_num;
 			open_files[i].offset = 0;
 			open_files[i].flags = 0777;
 			open_files[i].in_use = 1; 
-				
+			//kfree(inode);		
+			print_string("\n\0");		
+			print_string("open_files_index->\0");		
+			print_int(i);
 			return i;	
 		}
 
