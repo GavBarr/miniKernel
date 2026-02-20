@@ -352,8 +352,6 @@ int fs_open(char *path_name, uint32_t flags){
 			open_files[i].flags = 0777;
 			open_files[i].in_use = 1; 
 			//kfree(inode);		
-			print_string("open_files_index->\0");		
-			print_int(i);
 			return i;	
 		}
 

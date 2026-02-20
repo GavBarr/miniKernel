@@ -1,0 +1,8 @@
+*Scheduler Notes*
+
+Round Robin Scheduler
+
+- Each task/process will get an equal amount of processing time, no priority (yet)
+- Linked List is used for both the READY and BLOCKED queues
+- Critical Regions for processes have not been defined yet, thus the BLOCKED queue is not utilized at the moment
+- CPU context is defined as a struct, and used within the struct task. This contains register values of esp, eip etc.

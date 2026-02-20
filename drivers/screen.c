@@ -6,6 +6,8 @@
 #include "../include/memcopy.h"
 #include "../kernel_shell/parser.h"
 #include "../mem_alloc/heap.h"
+#include "../include/kernel/task.h"
+#include "../include/kernel/sched.h"
 #include "keyboard.h"
 #include "screen.h"
 #include <stdint.h>
@@ -32,6 +34,29 @@ static void malloc_and_print(char *size);
 static uint32_t convert_char_to_int(char *c);
 static void print_device_list();
 static void print_current_files_in_dir();
+static void test_task_function(void){
+
+	//uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
+	//temp_cursor_pos = display_vga_text("process successfuly running!", 28, temp_cursor_pos, 0xF);
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("\n\0");
+	print_string("process started!\n\0");
+       // uint64_t count = 0;
+       // while (count < 100000){
+        //        count++;
+       // }
+
+}
+
 
 void display_character(char character){
 	if (character == '\b'){
@@ -110,6 +135,24 @@ void display_character(char character){
                         }
                         if (arg) kfree(arg);
 			
+		}else if (strcompare(command, "start-process")){
+			struct task *task = task_create(test_task_function);	
+			uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
+		        temp_cursor_pos = display_vga_text("pid ", 4, temp_cursor_pos, 0xE);
+			char *pid = convert_int_to_char_arr(task->pid);
+		        temp_cursor_pos = display_vga_text(pid, strlength(pid), temp_cursor_pos, 0xE);
+			kfree(pid);
+			kfree(command);
+			
+		}else if (strcompare(command, "queue-tail")){
+			struct task *tail = return_ready_queue_tail();
+
+			uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
+        		temp_cursor_pos = display_vga_text("queue tail-> ", 13, temp_cursor_pos, 0xE);
+			char *pid = convert_int_to_char_arr(tail->pid);
+                        temp_cursor_pos = display_vga_text(pid, strlength(pid), temp_cursor_pos, 0xE);
+			kfree(command);
+			kfree(pid);
 		}else{
 			kfree(command);
 			print_command_err();

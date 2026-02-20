@@ -34,6 +34,10 @@ static void idle_task_function(void){
 	}
 }
 
+struct task *return_ready_queue_tail(void){
+	return ready_queue.tail;
+}
+
 void switch_task(struct task *old, struct task *new){
 	if (debug){
 		print_string("*old*\n\0");
@@ -89,21 +93,52 @@ void task_wrapper() {
 
 void exit_task(){
 	current_task->state = TASK_ZOMBIE;
-	//ready_queue.count--;
-	//print_string("schedule()\n\0");
+	//kfree(current_task);
 	schedule();
 }
 
-void enqueue_task(struct task *task){
+/**
+* @brief dequeues the task in the head of the READY queue 
+*
+* @param void
+* @return nothing
+*/
+void dequeue_task(void){
+	if (ready_queue.count == 0) return; //return if there is nothing to dequeue	
+	//kfree(ready_queue.head); TODO
+	ready_queue.head = ready_queue.head->next;
+	if (ready_queue.head != NULL){
+		ready_queue.head->prev = NULL;
+	}else{
+		ready_queue.tail = NULL;
+	}
+	
+	ready_queue.count--;
+}
 
+/**
+ * @brief enqueues task to the tail of the READY queue  
+ *
+ * @param  task  
+ */
+void enqueue_task(struct task *task){
+	task->next = NULL;
+	task->prev = NULL;
 	if (ready_queue.count == 0){
 		ready_queue.head = task;
 		ready_queue.tail = task;
+//		task->next = task;
+		//print_pointer(task);
+		
 	}else{
+		
 		//struct task *old_task = (struct task *)ready_queue.tail;
 		ready_queue.tail->next = task;	
 		task->prev = ready_queue.tail;
 		ready_queue.tail = task;
+			
+
+
 	}
 	ready_queue.count++;
 }
@@ -112,30 +147,38 @@ void enqueue_task(struct task *task){
 */
 void schedule(void){
 	if (ready_queue.count == 0){
-		if (current_task != idle_task){
-			struct task *old_task = current_task;
-			current_task = idle_task;
+		//if (current_task == idle_task){
+		//	return;
+		//}else{
+		//	struct task *old_task = current_task;
+		//	current_task = idle_task;
 			//print_string("idle_task\n\0");
-			switch_task(old_task, idle_task);
-		}
+		//	switch_task(old_task, idle_task);
+		//}
 		return;
 	}
-	//print_int(current_task->pid);
-	//print_int(ready_queue.head->pid);
 
-	//if the state is TASK_READY then we need to schedule that as the next task
-	//to run, otherwise go down the queue further		if (ready_queue.head == NULL) return;
-	if (ready_queue.head->state == TASK_READY){
-		struct task *new_task = ready_queue.head;
-		ready_queue.head = current_task->next;
-		ready_queue.count--;
-		
-		struct task *old_task = current_task;
-		old_task->state = TASK_READY;	
-		current_task = new_task;
-                current_task->state = TASK_RUNNING;
-		switch_task(old_task, new_task);
+
+	struct task *new_task = ready_queue.head;
+        dequeue_task();
+	print_string("pid->\0");
+	print_int(new_task->pid);
+	
+	if (new_task->state != TASK_READY){
+		return; //skip for now until ready
 	}
+	//to run, otherwise go down the queue further		if (ready_queue.head == NULL) return;
+	struct task *old_task = current_task;
+	if (old_task != idle_task){
+		old_task->state = TASK_READY;	
+		enqueue_task(old_task);
+		print_string("enqueue pid->\0");
+		print_int(old_task->pid);
+	}
+	current_task = new_task;
+        current_task->state = TASK_RUNNING;
+	if (old_task->pid == 2) print_string("switch_task()\n\0");
+	switch_task(old_task, new_task);
 		
 
 	return;
@@ -171,6 +214,7 @@ void scheduler_init(void){
 	task_init_stack(idle_task, idle_task_function);
 
 	current_task = idle_task;
+	//enqueue_task(idle_task);
 	
 			
 }

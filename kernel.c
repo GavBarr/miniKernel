@@ -36,8 +36,16 @@ static void debug_dump_bitmaps(struct Bitmap *inode_bitmap, struct Bitmap *block
 static void test_task_function(void);
 static void test_task_function(void){
 
-	print_string("PRINTING FROM MY TASK!\0");
-
+	print_string("BEFORE TASK!\0");
+	print_string("\n\0");
+	
+	int count = 0;
+	while (count < 10000ULL){
+		count++;
+	}
+	print_string("AFTER TASK!\0");
+	print_string("\n\0");
+	
 }
 
 
@@ -60,29 +68,20 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 	fs_init();
 	scheduler_init();
-
-	//display_registers();
-
-	struct task *temp_task = task_create(test_task_function);
-//	struct task *temp_task2 = task_create(test_task_function);
-	//print_task(temp_task2);
-	
-	
-
 	fs_mkdir("/home", 0777);
-	fs_mkdir("/tmp", 0777);
-	fs_mkdir("/etc", 0777);
-	fs_mkdir("/bin", 0777);
+        fs_mkdir("/tmp", 0777);
+        fs_mkdir("/etc", 0777);
+        fs_mkdir("/bin", 0777);
 
-//	fs_mkdir("/home/gavin", 0777);
-//	fs_mkdir("/home/gavin/tmp", 0777);
-
-	int file_chan = fs_open("/test.txt", 0777);
-	fs_close(file_chan);
-	
+	int file_chan = fs_open("/home/test.txt", 0777);
+        fs_close(file_chan);
 
 
-	shell_run();
+//	struct task *temp_task = task_create(test_task_function);
+//	struct task *temp_task2 = task_create(test_task_function);
+	struct task *shell_task = task_create(shell_run);
+//	shell_run();	
+
 
 	while(1){
 		

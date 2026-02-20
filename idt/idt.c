@@ -169,31 +169,33 @@ void isr_handler(uint32_t interrupt_number){
 //	v[2] = 'I';
 //	v[1] = 0x0F;
 	
+        if (interrupt_number == 14){
+                uint32_t fault_addr;
+                __asm__ volatile("mov %%cr2, %0" : "=r"(fault_addr));
+                print_string("---PAGE FAULT---\n\0");
+                print_pointer((void *)fault_addr);
+                display_registers();
 
-	if (interrupt_number == 14){
-		uint32_t fault_addr;
-		__asm__ volatile("mov %%cr2, %0" : "=r"(fault_addr));
-		print_string("---PAGE FAULT---\n\0");
-		print_pointer((void *)fault_addr);
-		display_registers();
+                while(1){
 
-		while(1){
-
-			__asm__ volatile("hlt");
-		}
-	}if(interrupt_number == 32){
-		tick_count++;
-		schedule();	
-	}if (interrupt_number == 33) {
+                        __asm__ volatile("hlt");
+                }
+        }if(interrupt_number == 32){
+                tick_count++;
+		//print_string("32\0");
+		outb(0x20, 0x20);
+                schedule();
+        }if (interrupt_number == 33) {
                 keyboard_handler();
         }
-	
-	if (interrupt_number == 46) {
+
+        if (interrupt_number == 46) {
                 ide_primary_irq_handler();
         }
         if (interrupt_number == 47) {
                 ide_secondary_irq_handler();
         }
+
 
 
 	if (interrupt_number >= 32 && interrupt_number <= 47){

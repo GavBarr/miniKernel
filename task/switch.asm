@@ -24,5 +24,6 @@ context_switch:
 	mov ecx, [edx + 16]
 	mov esp, [edx + 20] ;switch to the new stack
 	push ecx ;push new eip first
+	sti
 		
 	ret	

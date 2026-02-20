@@ -40,7 +40,7 @@ void print_task(struct task *task){
 
 struct task *task_create(void (*entry_point)(void)){
 	int pid = get_next_pid();
-
+	
 	struct task *new_task = kmalloc(sizeof(struct task));
 	new_task->pid = pid;
 	new_task->state = TASK_READY;
@@ -61,11 +61,13 @@ struct task *task_create(void (*entry_point)(void)){
 	context->ebx = 0;
 	context->ebp = 0;
 	context->eip = (uint32_t)task_wrapper;
-	context->esp = stack_top;
+	context->esp = stack_top + sizeof(cpu_context);
 
 
 	new_task->context = context;
-	enqueue_task(new_task); //need to put this task 
+
+	//print_string("enqueue_task()\n\0");
+	 enqueue_task(new_task); //need to put this task 
 	
 	return new_task;
 }

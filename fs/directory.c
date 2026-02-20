@@ -200,7 +200,6 @@ int file_create_inside_dir(uint32_t parent_inode_num, char *name, uint32_t permi
 
         uint32_t inode_num;
         if (file_create(sb, &inode_num, inode_bitmap, permissions, disk) != 0) return -1;
-	print_int(inode_num);
         struct Inode *dir_inode = kmalloc(sizeof(struct Inode));
         if (inode_read(dir_inode, inode_num, sb, disk) != 0) return -1; //basically read the existing inode num
 
