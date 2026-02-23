@@ -14,7 +14,9 @@ The project focuses on understanding how an OS works from the ground up, includi
 - ATA Driver Implemented (✓)
 - Kernel Shell (✓)
 - Ext2 Filesystem (*works but in progress*)
-- Scheduler (*works but in progress*)
+- Preemptive Scheduler (*works but in progress*)
+- Syscalls (*in progress*)
+- Userspace (*in progress*)
 
 ---
 
