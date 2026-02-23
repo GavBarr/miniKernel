@@ -5,10 +5,53 @@
 #include "../mem_alloc/heap.h"
 #include <stdint.h>
 #include <stddef.h>
+#define MAX_NUMBER_OF_TASKS 12
 
-
+struct running_tasks *task_list;
 int latest_pid = 0;
 static int get_next_pid();
+
+void tasks_array_init(void){
+	task_list = kmalloc(sizeof(struct running_tasks) * MAX_NUMBER_OF_TASKS);
+	for (int i = 0; i < MAX_NUMBER_OF_TASKS; i++){
+		task_list[i].used = 0;
+		task_list[i].task = NULL;
+	}
+}
+
+int find_task(int pid){
+	
+	for (int i = 0; i < MAX_NUMBER_OF_TASKS; i++){
+		if (task_list[i].used != 1) continue;
+		if (task_list[i].task->pid == pid) return i;
+	}
+
+	return -1;
+}
+
+
+
+int add_task_to_array(struct task *task){
+	for (int i = 0; i < MAX_NUMBER_OF_TASKS; i++){
+		if (task_list[i].used == 1) continue;
+		task_list[i].used = 1;
+		task_list[i].task = task;
+		return 0;
+	}
+	return -1;
+}
+
+int return_task_list(int *list){
+		
+	int j = 0;
+	for (int i = 0; i < MAX_NUMBER_OF_TASKS; i++){
+		if (task_list[i].used == 0) continue;
+		list[j] = task_list[i].task->pid;
+		j++;
+	}
+	return j;
+
+}
 
 void print_task(struct task *task){
 	print_string("--task--\n\0");
@@ -67,15 +110,19 @@ struct task *task_create(void (*entry_point)(void)){
 	new_task->context = context;
 
 	//print_string("enqueue_task()\n\0");
-	 enqueue_task(new_task); //need to put this task 
-	
+	enqueue_task(new_task); //need to put this task 
+	add_task_to_array(new_task);	
 	return new_task;
 }
 
-int task_destroy(struct task *task){
-	kfree((void *)task->kernel_stack);
-	kfree(task);
+int task_destroy(int pid){
+	int array_index = find_task(pid);
+	if (array_index == -1) return -1;
 
+	task_list[array_index].task->state = TASK_ZOMBIE;
+	task_list[array_index].task = NULL;
+	task_list[array_index].used = 0;
+	
 	return 0;
 }
 int task_set_state(struct task *task ,task_state state){

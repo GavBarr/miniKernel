@@ -67,31 +67,31 @@ void display_registers(void){
 	
 	print_string("eax->\0");
 	print_int(eax);
-	print_string("\n\0");
+	print_string(" \0");
 
 	print_string("ebx->\0");
         print_int(ebx);
-        print_string("\n\0");
+        print_string(" \0");
 
 	print_string("ecx->\0");
         print_int(ecx);
-        print_string("\n\0");
+        print_string(" \0");
 
         print_string("edx->\0");
         print_int(edx);
-        print_string("\n\0");
+        print_string(" \0");
 
 	print_string("esi->\0");
         print_int(esi);
-        print_string("\n\0");
+        print_string(" \0");
 
         print_string("edi->\0");
         print_int(edi);
-        print_string("\n\0");
+        print_string(" \0");
 
 	print_string("ebp->\0");
         print_int(ebp);
-        print_string("\n\0");
+        print_string(" \0");
 
         print_string("esp->\0");
         print_int(esp);
@@ -99,23 +99,23 @@ void display_registers(void){
 
 	print_string("cs->\0");
         print_int(cs);
-        print_string("\n\0");
+        print_string(" \0");
 
         print_string("ds->\0");
         print_int(ds);
-        print_string("\n\0");
+        print_string(" \0");
 
         print_string("ss->\0");
         print_int(ss);
-        print_string("\n\0");
+        print_string(" \0");
 
         print_string("es->\0");
         print_int(es);
-        print_string("\n\0");
+        print_string(" \0");
 
         print_string("fs->\0");
         print_int(fs);
-        print_string("\n\0");
+        print_string(" \0");
 
         print_string("gs->\0");
         print_int(gs);
@@ -123,19 +123,19 @@ void display_registers(void){
 
         print_string("cr0->\0");
         print_int(cr0);
-        print_string("\n\0");
+        print_string(" \0");
 
         print_string("cr2->\0");
         print_int(cr2);
-        print_string("\n\0");
+        print_string(" \0");
 
 	print_string("cr3->\0");
         print_int(cr3);
-        print_string("\n\0");
+        print_string(" \0");
 
         print_string("cr4->\0");
         print_int(cr4);
-        print_string("\n\0");
+        print_string(" \0");
 
 }
 

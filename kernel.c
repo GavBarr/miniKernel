@@ -36,15 +36,11 @@ static void debug_dump_bitmaps(struct Bitmap *inode_bitmap, struct Bitmap *block
 static void test_task_function(void);
 static void test_task_function(void){
 
-	print_string("BEFORE TASK!\0");
-	print_string("\n\0");
 	
 	int count = 0;
-	while (count < 10000ULL){
-		count++;
+	while (1){
+	
 	}
-	print_string("AFTER TASK!\0");
-	print_string("\n\0");
 	
 }
 
@@ -79,6 +75,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 
 //	struct task *temp_task = task_create(test_task_function);
 //	struct task *temp_task2 = task_create(test_task_function);
+
 	struct task *shell_task = task_create(shell_run);
 //	shell_run();	
 

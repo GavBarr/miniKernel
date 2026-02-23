@@ -38,8 +38,17 @@ struct task{
 	
 };
 
+struct running_tasks{
+	struct task *task;
+	int used;
+};
+
+void tasks_array_init(void);
+int find_task(int pid);
+int add_task_to_array(struct task *task);
+int return_task_list(int *list);
 struct task *task_create(void (*entry_point)(void));
-int task_destroy(struct task *task);
+int task_destroy(int pid);
 int task_set_state(struct task *task, task_state state);
 task_state task_get_state(struct task *task);
 void print_task(struct task *task);

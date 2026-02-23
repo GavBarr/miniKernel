@@ -34,27 +34,22 @@ static void malloc_and_print(char *size);
 static uint32_t convert_char_to_int(char *c);
 static void print_device_list();
 static void print_current_files_in_dir();
+static void display_current_processes();
+
 static void test_task_function(void){
 
 	//uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
 	//temp_cursor_pos = display_vga_text("process successfuly running!", 28, temp_cursor_pos, 0xF);
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("\n\0");
-	print_string("process started!\n\0");
-       // uint64_t count = 0;
-       // while (count < 100000){
-        //        count++;
-       // }
-
+        uint64_t count = 0;
+        while (1){
+		for (int i = 0; i < 100; i++){
+			//if (i = 50) print_string("yo\0");
+		}
+	//	print_string("process yielding\0");
+		//yield();
+	}
+	
+	//print_string("process ended!\n\0");
 }
 
 
@@ -153,6 +148,32 @@ void display_character(char character){
                         temp_cursor_pos = display_vga_text(pid, strlength(pid), temp_cursor_pos, 0xE);
 			kfree(command);
 			kfree(pid);
+		}else if (strcompare(command, "process-list")){
+			display_current_processes();
+			kfree(command);
+
+		}else if(strcompare(command, "kill\0")){
+			kfree(command);
+			uint32_t len = 5;
+			char *arg = parse_arg(get_keyboard_buffer(), len);
+			if (arg[0] != '\0'){
+				uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
+				int pid = arg[0] - '0'; //conver to int
+				if (pid == 1){
+					temp_cursor_pos = display_vga_text("err: cannot kill shell!",23 , temp_cursor_pos, 0xC);
+				}else{
+
+					int status = task_destroy(pid);
+					if (status == -1){
+						temp_cursor_pos = display_vga_text("err: invalid pid",16 , temp_cursor_pos, 0xC);
+					
+					}else{
+						temp_cursor_pos = display_vga_text("killed pid[", 11, temp_cursor_pos, 0xF);
+			                        temp_cursor_pos = display_vga_text(arg, strlength(arg), temp_cursor_pos, 0xE);
+						temp_cursor_pos = display_vga_text("] ", 2, temp_cursor_pos, 0xF);
+					}
+				}
+			}
 		}else{
 			kfree(command);
 			print_command_err();
@@ -177,6 +198,27 @@ void display_character(char character){
 	}
 
 }
+
+static void display_current_processes(){
+	
+	uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
+
+	//12 is the maximum amount of processes that are allowed at the moment, thus the allocation of only 12 for the *list 
+	int *list = kmalloc(12 * sizeof(int));
+        int count = return_task_list(list);
+        for (int i = 0; i < count; i++){
+                if (list[i] > 12 || list[i] <= 0) continue;
+		char *pid = convert_int_to_char_arr(list[i]);
+                temp_cursor_pos = display_vga_text("pid: ", 5, temp_cursor_pos, 0x0F);
+                temp_cursor_pos = display_vga_text(pid, strlength(pid), temp_cursor_pos, 0x0F);
+
+		row++;
+                temp_cursor_pos = ((row * 2) - 1) * 80;
+        }
+        kfree(list);
+
+}
+
 void clear_screen(void){
 	uint32_t total_spaces = 80 * 25;
 	for (uint32_t i = 0; i < total_spaces; i++){
