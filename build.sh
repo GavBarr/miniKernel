@@ -36,6 +36,7 @@ gcc $CFLAGS -c include/strcompare.c      -o include/strcompare.o
 gcc $CFLAGS -c include/strlength.c      -o include/strlength.o
 gcc $CFLAGS -c include/memset.c      -o include/memset.o
 gcc $CFLAGS -c include/memcopy.c      -o include/memcopy.o
+gcc $CFLAGS -c include/stdlib.c      -o include/stdlib.o
 gcc $CFLAGS -c include/device_manager.c      -o include/device_manager.o
 gcc $CFLAGS -c task/sched.c      -o task/sched.o
 gcc $CFLAGS -c task/task.c      -o task/task.o
@@ -48,7 +49,7 @@ ld -m elf_i386 -T linker.ld \
   fs/superblock.o fs/bitmap.o fs/file.o fs/inode.o fs/directory.o fs/fs.o\
   mem_alloc/mm.o mem_alloc/mem_alloc.o mem_alloc/bitmap.o \
   mem_alloc/heap.o paging/paging.o debug/debug.o kernel_shell/shell.o include/strcompare.o include/strlength.o include/memset.o\
-  include/device_manager.o include/memcopy.o\
+  include/device_manager.o include/memcopy.o stdlib.o\
   task/sched.o task/task.o
 
 echo "CreatingISO..."
