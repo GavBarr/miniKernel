@@ -11,6 +11,8 @@ struct running_tasks *task_list;
 int latest_pid = 0;
 static int get_next_pid();
 
+
+
 void tasks_array_init(void){
 	task_list = kmalloc(sizeof(struct running_tasks) * MAX_NUMBER_OF_TASKS);
 	for (int i = 0; i < MAX_NUMBER_OF_TASKS; i++){
@@ -133,6 +135,19 @@ int task_destroy(int pid){
 	
 	return 0;
 }
+
+void task_block(struct task *task){
+	task->state = TASK_BLOCKED;
+
+	schedule();
+}
+
+void task_unblock(struct task *task){
+	task->state = TASK_READY;
+
+	//schedule();
+}
+
 int task_set_state(struct task *task ,task_state state){
 	
 	task->state = state;

@@ -41,13 +41,15 @@ static void test_task_function(void){
 	//uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
 	//temp_cursor_pos = display_vga_text("process successfuly running!", 28, temp_cursor_pos, 0xF);
         uint64_t count = 0;
-        while (1){
-		for (int i = 0; i < 100; i++){
+
+	int file_chan = fs_open("/home/test.txt", 0777);
+        //while (1){
+	//	for (int i = 0; i < 100; i++){
 			//if (i = 50) print_string("yo\0");
-		}
+	//	}
 	//	print_string("process yielding\0");
 		//yield();
-	}
+	//}
 	
 	//print_string("process ended!\n\0");
 }
@@ -131,7 +133,7 @@ void display_character(char character){
                         if (arg) kfree(arg);
 			
 		}else if (strcompare(command, "start-process")){
-			struct task *task = task_create(test_task_function, 10);	
+			struct task *task = task_create(test_task_function, 1);	
 			uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
 		        temp_cursor_pos = display_vga_text("pid ", 4, temp_cursor_pos, 0xE);
 			char *pid = convert_int_to_char_arr(task->pid);

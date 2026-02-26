@@ -1,6 +1,7 @@
 #include "ide_ata_driver.h"
 #include "../debug/debug.h"
 #include "../include/block_device.h"
+#include "../include/kernel/task.h"
 #include "../mem_alloc/heap.h"
 #include <stddef.h>
 #include <stdint.h>
@@ -13,7 +14,7 @@ static inline void io_wait();
 static void probe_channels();
 static void enable_interrupts();
 static void disable_interrupts();
-
+struct block_device *main_disk; //this is used to track on a global scale, so we can access things like the task
 //max possible drives
 static struct ide_device *ide_dev;//when we allocated we declare enough space
 //primary and secondory
@@ -50,17 +51,17 @@ struct block_device *ide_init(){
 	enable_interrupts();
 
 
-	struct block_device *disk = kmalloc(sizeof(struct block_device));
-	disk->name = "disk0";
-        disk->block_size = 512;
-        disk->block_count = ide_dev[0].size;
-        disk->ops = &ops;
-        disk->data = (void *)0;
+	main_disk = kmalloc(sizeof(struct block_device));
+	main_disk->name = "disk0";
+        main_disk->block_size = 512;
+        main_disk->block_count = ide_dev[0].size;
+        main_disk->ops = &ops;
+        main_disk->data = (void *)0;
 
 
 //	print_int(disk->block_count);
 
-        return disk;
+        return main_disk;
 
 
 }
@@ -247,7 +248,12 @@ int ide_read_block(struct block_device *dev, uint32_t lba, void *buffer){
 
 }
 
-
+void block_device_complete(struct block_device *disk){
+	if (disk->waiting_task){
+		task_unblock(disk->waiting_task);
+		disk->waiting_task = NULL;
+	}
+}
 
 void ide_primary_irq_handler(){
 	uint8_t status = inb(ide_chan[0].base_io_port + 7);
@@ -259,7 +265,7 @@ void ide_primary_irq_handler(){
 
 	//if data is ready (DRQ bit)
 	if (status & 0x08){
-	
+		block_device_complete(main_disk);	
 	}
 }
 

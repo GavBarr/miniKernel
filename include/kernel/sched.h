@@ -18,5 +18,6 @@ void switch_task(struct task *old, struct task *new);
 void enqueue_task(struct task *task);
 void dequeue_task(void);
 void task_wrapper(void);
+struct task *get_current_task(void);
 void exit_task(void);
 #endif

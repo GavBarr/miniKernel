@@ -27,6 +27,11 @@ int next_pid;
 static void task_init_stack(struct task *task, void (*entry_point)(void));
 static void idle_task_function(void);
 
+struct task *get_current_task(void){
+	return current_task;
+}
+
+
 static void idle_task_function(void){
 //	print_string("IDLE TASK FUNCTION\n\0");
 	while (1){

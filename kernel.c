@@ -69,14 +69,14 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
         fs_mkdir("/etc", 0777);
         fs_mkdir("/bin", 0777);
 
-	int file_chan = fs_open("/home/test.txt", 0777);
-        fs_close(file_chan);
+//	int file_chan = fs_open("/home/test.txt", 0777);
+//        fs_close(file_chan);
 
 
 //	struct task *temp_task = task_create(test_task_function);
 //	struct task *temp_task2 = task_create(test_task_function);
 
-	struct task *shell_task = task_create(shell_run, 1);
+	struct task *shell_task = task_create(shell_run, 10);
 //	shell_run();	
 
 

@@ -43,6 +43,9 @@ struct running_tasks{
 	int used;
 };
 
+
+void task_block(struct task *task);
+void task_unblock(struct task *task);
 struct task *get_task(int pid);
 void tasks_array_init(void);
 int find_task(int pid);

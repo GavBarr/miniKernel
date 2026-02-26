@@ -1,6 +1,7 @@
 #ifndef BLOCK_DEVICE_H
 #define BLOCK_DEVICE_H
 #include <stdint.h>
+#include "kernel/task.h"
 
 
 struct block_device{
@@ -16,6 +17,9 @@ struct block_device{
 
 	//store driver-specific information
 	void *data;
+
+	//we must track the current task attached to the device, otherwise we will have no way to unblock the task to continue on with the scheduler
+	struct task *waiting_task;
 
 	//track how many users have the device open
 //	uint32_t open_count;
