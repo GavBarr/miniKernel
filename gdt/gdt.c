@@ -1,7 +1,10 @@
 #include "gdt.h"
+#include "../include/kernel/tss.h"
+#include "../include/kernel/config.h"
 
 struct gdt_ptr g_ptr;
-struct gdt_entry gdt[5];
+struct gdt_entry gdt[6];
+struct tss tss_entry;
 //0 - Null Descriptor
 //1 - Kernel code segment descriptor
 //2 - Kernel data segment descriptor
@@ -11,9 +14,24 @@ void gdt_init(void){
 	//dont need to do this for [0] because it should all be NULL or rather 0
 	gdt_add_entry(1, 0, 0xFFFFF, 0x9A, 0xCF);
 	gdt_add_entry(2, 0, 0xFFFFF, 0x92, 0xCF);
+
+	//userspace entries
 	gdt_add_entry(3, 0, 0xFFFFF, 0xFA, 0xCF);
 	gdt_add_entry(4, 0, 0xFFFFF, 0xF2, 0xCF);
 	
+	uint8_t kernel_stack[KERNEL_STACK_SIZE]; //bottom of the stack
+	tss_entry.prev_tss = 0;
+	tss_entry.esp0 = (uint32_t)(kernel_stack + KERNEL_STACK_SIZE);
+	tss_entry.ss0 = 0x10; //kernel data segment location
+	tss_entry.esp1 = 0;
+	tss_entry.ss1 = 0;
+	tss_entry.esp2 = 0;
+	tss_entry.ss2 = 0;
+
+
+	//tss
+	//gdt_add_entry
+
 
 	g_ptr.limit = sizeof(gdt) -1;
 	g_ptr.base = (uint32_t)&gdt;

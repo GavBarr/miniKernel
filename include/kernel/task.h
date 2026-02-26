@@ -43,6 +43,7 @@ struct running_tasks{
 	int used;
 };
 
+struct task *get_task(int pid);
 void tasks_array_init(void);
 int find_task(int pid);
 int add_task_to_array(struct task *task);

@@ -206,15 +206,34 @@ static void display_current_processes(){
 	//12 is the maximum amount of processes that are allowed at the moment, thus the allocation of only 12 for the *list 
 	int *list = kmalloc(12 * sizeof(int));
         int count = return_task_list(list);
+
+	temp_cursor_pos = display_vga_text("+-------+----------------+", strlength("+-------+----------------+"), temp_cursor_pos, 0x0F);
+        row++;                          
+        temp_cursor_pos = ((row * 2) - 1) * 80;
+	temp_cursor_pos = display_vga_text("| PID   | Address        |", strlength("| PID   | Address        |"), temp_cursor_pos, 0x0F);
+	row++;
+        temp_cursor_pos = ((row * 2) - 1) * 80;
+	temp_cursor_pos = display_vga_text("+-------+----------------+", strlength("+-------+----------------+"), temp_cursor_pos, 0x0F);
+        row++;
+        temp_cursor_pos = ((row * 2) - 1) * 80;
+
         for (int i = 0; i < count; i++){
                 if (list[i] > 12 || list[i] <= 0) continue;
 		char *pid = convert_int_to_char_arr(list[i]);
-                temp_cursor_pos = display_vga_text("pid: ", 5, temp_cursor_pos, 0x0F);
+                temp_cursor_pos = display_vga_text("| ", 2, temp_cursor_pos, 0x0F);
                 temp_cursor_pos = display_vga_text(pid, strlength(pid), temp_cursor_pos, 0x0F);
+                temp_cursor_pos = display_vga_text("     |", 6, temp_cursor_pos, 0x0F);
+		
+		char *addr = convert_pointer_to_char_arr(get_task(list[i]));
+                temp_cursor_pos = display_vga_text(addr, strlength(addr), temp_cursor_pos, 0x0F);
+                temp_cursor_pos = display_vga_text("      |", 7, temp_cursor_pos, 0x0F);
 
 		row++;
                 temp_cursor_pos = ((row * 2) - 1) * 80;
         }
+	temp_cursor_pos = display_vga_text("+-------+----------------+", strlength("+-------+----------------+"), temp_cursor_pos, 0x0F);
+        row++;
+        temp_cursor_pos = ((row * 2) - 1) * 80;
         kfree(list);
 
 }

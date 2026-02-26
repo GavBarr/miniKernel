@@ -41,6 +41,14 @@ int add_task_to_array(struct task *task){
 	return -1;
 }
 
+struct task *get_task(int pid){
+	
+	for (int i = 0; i < MAX_NUMBER_OF_TASKS; i++){
+		if (task_list[i].task->pid == pid) return task_list[i].task;
+	}
+	return NULL;
+}
+
 int return_task_list(int *list){
 		
 	int j = 0;
