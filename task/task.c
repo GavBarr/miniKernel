@@ -89,14 +89,14 @@ void print_task(struct task *task){
 //        print_string("\n\0");
 }
 
-struct task *task_create(void (*entry_point)(void)){
+struct task *task_create(void (*entry_point)(void), uint32_t priority){
 	int pid = get_next_pid();
 	
 	struct task *new_task = kmalloc(sizeof(struct task));
 	new_task->pid = pid;
 	new_task->state = TASK_READY;
 	new_task->kernel_stack = (uint32_t)kmalloc(KERNEL_STACK_SIZE);
-	new_task->priority = 0;
+	new_task->priority = priority;
 	new_task->parent = NULL;
 	new_task->next = NULL;
 	new_task->prev = NULL;

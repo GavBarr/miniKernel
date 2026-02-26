@@ -131,7 +131,7 @@ void display_character(char character){
                         if (arg) kfree(arg);
 			
 		}else if (strcompare(command, "start-process")){
-			struct task *task = task_create(test_task_function);	
+			struct task *task = task_create(test_task_function, 100);	
 			uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
 		        temp_cursor_pos = display_vga_text("pid ", 4, temp_cursor_pos, 0xE);
 			char *pid = convert_int_to_char_arr(task->pid);

@@ -76,7 +76,7 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
 //	struct task *temp_task = task_create(test_task_function);
 //	struct task *temp_task2 = task_create(test_task_function);
 
-	struct task *shell_task = task_create(shell_run);
+	struct task *shell_task = task_create(shell_run, 1);
 //	shell_run();	
 
 

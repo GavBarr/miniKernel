@@ -143,10 +143,12 @@ void schedule(void){
 		return;
 	}
 
-	//print_string("head->\0");
-        //print_pointer(ready_queue.head);
-        //print_string(" tail->\0");
-        //print_pointer(ready_queue.tail);
+	if (current_task->time_slice <= current_task->priority){
+		current_task->time_slice++;
+		return;
+	}else{
+		current_task->time_slice=0;
+	}
 
 	struct task *new_task = ready_queue.head;
 
