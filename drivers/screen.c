@@ -136,11 +136,11 @@ void display_character(char character){
 			
 		}else if (strcompare(command, "start-process")){
 			struct task *task = task_create(test_task_function, 1);	
-			uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
-		        temp_cursor_pos = display_vga_text("pid ", 4, temp_cursor_pos, 0xE);
-			char *pid = convert_int_to_char_arr(task->pid);
-		        temp_cursor_pos = display_vga_text(pid, strlength(pid), temp_cursor_pos, 0xE);
-			kfree(pid);
+		//	uint32_t temp_cursor_pos = ((row * 2) - 1) * 80;
+		  //      temp_cursor_pos = display_vga_text("pid ", 4, temp_cursor_pos, 0xE);
+		//	char *pid = convert_int_to_char_arr(task->pid);
+		  //      temp_cursor_pos = display_vga_text(pid, strlength(pid), temp_cursor_pos, 0xE);
+		//	kfree(pid);
 			kfree(command);
 			
 		}else if (strcompare(command, "queue-tail")){
@@ -213,6 +213,7 @@ static void display_current_processes(){
 	print_string("list_count->\0");
 	print_int(count);
 	print_string("\n\0");
+	//return;
 
 	temp_cursor_pos = display_vga_text("+-------+----------------+", strlength("+-------+----------------+"), temp_cursor_pos, 0x0F);
         row++;                          
