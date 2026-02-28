@@ -250,7 +250,7 @@ int ide_read_block(struct block_device *dev, uint32_t lba, void *buffer){
 
 void block_device_complete(struct block_device *disk){
 	if (disk->waiting_task){
-		task_unblock(disk->waiting_task);
+		//task_unblock(disk->waiting_task);
 		disk->waiting_task = NULL;
 	}
 }

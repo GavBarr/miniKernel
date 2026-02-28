@@ -43,6 +43,17 @@ int add_task_to_array(struct task *task){
 	return -1;
 }
 
+int remove_task_from_array(struct task *task){
+	for (int i = 0; i < MAX_NUMBER_OF_TASKS; i++){
+		if (task_list[i].used == 0) continue;
+		if (task_list[i].task != task) continue;
+		task_list[i].used = 0;
+		task_list[i].task = NULL;
+		return 0;
+	}
+	return -1;
+}
+
 struct task *get_task(int pid){
 	
 	for (int i = 0; i < MAX_NUMBER_OF_TASKS; i++){
@@ -59,6 +70,7 @@ int return_task_list(int *list){
 		list[j] = task_list[i].task->pid;
 		j++;
 	}
+	
 	return j;
 
 }
@@ -103,6 +115,7 @@ struct task *task_create(void (*entry_point)(void), uint32_t priority){
 	new_task->next = NULL;
 	new_task->prev = NULL;
 	new_task->entry_point = entry_point;
+	
 
 	uint32_t stack_top = new_task->kernel_stack + KERNEL_STACK_SIZE;
 	stack_top -= sizeof(cpu_context);
@@ -120,7 +133,8 @@ struct task *task_create(void (*entry_point)(void), uint32_t priority){
 	new_task->context = context;
 
 	//print_string("enqueue_task()\n\0");
-	enqueue_task(new_task); //need to put this task 
+	enqueue_task(new_task); //need to put this task
+	//print_int(new_task->pid); 
 	add_task_to_array(new_task);	
 	return new_task;
 }
@@ -136,17 +150,17 @@ int task_destroy(int pid){
 	return 0;
 }
 
-void task_block(struct task *task){
-	task->state = TASK_BLOCKED;
+//void task_block(struct task *task){
+//	task->state = TASK_BLOCKED;
 
-	schedule();
-}
+//	schedule();
+//}
 
-void task_unblock(struct task *task){
-	task->state = TASK_READY;
+//void task_unblock(struct task *task){
+//	task->state = TASK_READY;
 
 	//schedule();
-}
+//}
 
 int task_set_state(struct task *task ,task_state state){
 	

@@ -69,7 +69,10 @@ void kernel_main(uint32_t magic, uint32_t multiboot_addr){
         fs_mkdir("/etc", 0777);
         fs_mkdir("/bin", 0777);
 
-//	int file_chan = fs_open("/home/test.txt", 0777);
+//	print_string("current function -> \0");
+//	print_string((char *)__func__);
+	int file_chan = fs_open("/home/test.txt", 0777);
+	
 //        fs_close(file_chan);
 
 

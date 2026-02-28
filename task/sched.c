@@ -103,8 +103,13 @@ void task_wrapper() {
 
 void exit_task(){
 	current_task->state = TASK_ZOMBIE;
+	current_task->time_slice = 0;
+	//print_string("exit()\n\0");
+	task_destroy(current_task->pid);
+	//remove_task_from_array(current_task);
 	//dequeue_task();
 	//kfree(current_task);
+	print_string("exit schedule()\n\0");
 	schedule();
 }
 
@@ -160,6 +165,7 @@ void schedule(void){
         dequeue_task();
 	
 	if (new_task->state != TASK_READY){
+		schedule();
 		return; //skip for now until ready
 	}
 

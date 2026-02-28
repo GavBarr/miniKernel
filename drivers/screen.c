@@ -42,14 +42,15 @@ static void test_task_function(void){
 	//temp_cursor_pos = display_vga_text("process successfuly running!", 28, temp_cursor_pos, 0xF);
         uint64_t count = 0;
 
-	int file_chan = fs_open("/home/test.txt", 0777);
-        //while (1){
+	print_string("process started!\n\0");
+	//int file_chan = fs_open("/home/test.txt", 0777);
+//        while (1){
 	//	for (int i = 0; i < 100; i++){
 			//if (i = 50) print_string("yo\0");
 	//	}
 	//	print_string("process yielding\0");
 		//yield();
-	//}
+//	}
 	
 	//print_string("process ended!\n\0");
 }
@@ -121,7 +122,8 @@ void display_character(char character){
 			kfree(command);
 
 		}else if (strcompare(command, "cd\0")){
-			kfree(command);
+			if (command) kfree(command);
+
 			uint32_t len = 3;
                         char *arg = parse_arg(get_keyboard_buffer(), len);
                         if (arg[0] != '\0'){
@@ -208,6 +210,9 @@ static void display_current_processes(){
 	//12 is the maximum amount of processes that are allowed at the moment, thus the allocation of only 12 for the *list 
 	int *list = kmalloc(12 * sizeof(int));
         int count = return_task_list(list);
+	print_string("list_count->\0");
+	print_int(count);
+	print_string("\n\0");
 
 	temp_cursor_pos = display_vga_text("+-------+----------------+", strlength("+-------+----------------+"), temp_cursor_pos, 0x0F);
         row++;                          

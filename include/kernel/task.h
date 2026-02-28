@@ -44,12 +44,13 @@ struct running_tasks{
 };
 
 
-void task_block(struct task *task);
-void task_unblock(struct task *task);
+//void task_block(struct task *task);
+//void task_unblock(struct task *task);
 struct task *get_task(int pid);
 void tasks_array_init(void);
 int find_task(int pid);
 int add_task_to_array(struct task *task);
+int remove_task_from_array(struct task *task);
 int return_task_list(int *list);
 struct task *task_create(void (*entry_point)(void), uint32_t priority);
 int task_destroy(int pid);
