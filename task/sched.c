@@ -132,6 +132,10 @@ void dequeue_task(void){
  */
 void enqueue_task(struct task *task){
 	// if nothing is in the queue we need to set the head and tail to the only task, which is the incoming task
+	if (task->pid == 3){
+		print_string("ready_queue.count\0");
+		print_int(ready_queue.count);
+	}
 	if (ready_queue.count == 0){
 		ready_queue.head = task;
 		ready_queue.tail = task;
@@ -142,8 +146,9 @@ void enqueue_task(struct task *task){
 		task->prev = ready_queue.tail;
 		ready_queue.tail = task;
 	}
-
+	
 	ready_queue.count++;
+	if (task->pid == 3) print_string("PID 3 END OF ENQUEUE()\n\0");
 }
 
 /* schedules the next task accordingly to the queue
@@ -160,6 +165,7 @@ void schedule(void){
 		current_task->time_slice=0;
 	}
 
+	if (current_task->pid == 3) print_string("yo\n\0");
 	struct task *new_task = ready_queue.head;
 
         dequeue_task();

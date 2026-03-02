@@ -131,8 +131,10 @@ struct task *task_create(void (*entry_point)(void), uint32_t priority){
 
 
 	new_task->context = context;
-
+	
 	//print_string("enqueue_task()\n\0");
+	//if (pid == 3) print_string("task_pid->\0");
+	//if (pid == 3) print_int(new_task->pid);
 	enqueue_task(new_task); //need to put this task
 	//print_int(new_task->pid); 
 	add_task_to_array(new_task);	
