@@ -213,7 +213,7 @@ static void display_current_processes(){
 	print_string("list_count->\0");
 	print_int(count);
 	print_string("\n\0");
-	//return;
+	return;
 
 	temp_cursor_pos = display_vga_text("+-------+----------------+", strlength("+-------+----------------+"), temp_cursor_pos, 0x0F);
         row++;                          

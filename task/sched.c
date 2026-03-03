@@ -106,7 +106,7 @@ void exit_task(){
 	current_task->time_slice = 0;
 	//print_string("exit()\n\0");
 	task_destroy(current_task->pid);
-	//remove_task_from_array(current_task);
+	remove_task_from_array(current_task);
 	//dequeue_task();
 	//kfree(current_task);
 	print_string("exit schedule()\n\0");
@@ -132,10 +132,6 @@ void dequeue_task(void){
  */
 void enqueue_task(struct task *task){
 	// if nothing is in the queue we need to set the head and tail to the only task, which is the incoming task
-	if (task->pid == 3){
-		print_string("ready_queue.count\0");
-		print_int(ready_queue.count);
-	}
 	if (ready_queue.count == 0){
 		ready_queue.head = task;
 		ready_queue.tail = task;
@@ -148,7 +144,6 @@ void enqueue_task(struct task *task){
 	}
 	
 	ready_queue.count++;
-	if (task->pid == 3) print_string("PID 3 END OF ENQUEUE()\n\0");
 }
 
 /* schedules the next task accordingly to the queue
@@ -158,16 +153,16 @@ void schedule(void){
 		return;
 	}
 
-	if (current_task->time_slice <= current_task->priority){
-		current_task->time_slice++;
-		return;
-	}else{
-		current_task->time_slice=0;
-	}
+	//if (current_task->time_slice <= current_task->priority){
+	//	current_task->time_slice++;
+	//	return;
+	//}else{
+	//	current_task->time_slice=0;
+	//}
 
-	if (current_task->pid == 3) print_string("yo\n\0");
 	struct task *new_task = ready_queue.head;
-
+	
+	if (new_task->pid == 3) print_string("new_task->pid->3\n\0");
         dequeue_task();
 	
 	if (new_task->state != TASK_READY){
@@ -179,27 +174,12 @@ void schedule(void){
 	struct task *old_task = current_task;
 	if (old_task != idle_task && old_task->state != TASK_ZOMBIE){
 		old_task->state = TASK_READY;
-		//print_string("\nenqueue(old_task)->\0");
-		//print_pointer(old_task);
 		enqueue_task(old_task);
 	}
-
 	current_task = new_task;
         current_task->state = TASK_RUNNING;
 
-	//print_string("switch_task(old_task->\0");
-	//print_pointer(old_task);
-	//print_string(" pid->\0");
-	//print_int(old_task->pid);
-	//print_string("\n\0");
-	//print_string("switch_task(new_task->\0");
-	//print_pointer(new_task);
-	//print_string(" pid->\0");
-	//print_int(new_task->pid);
-	//print_string("\n\0");
-
 	switch_task(old_task, new_task);
-		
 
 	return;
 	
