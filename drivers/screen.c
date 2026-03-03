@@ -210,10 +210,6 @@ static void display_current_processes(){
 	//12 is the maximum amount of processes that are allowed at the moment, thus the allocation of only 12 for the *list 
 	int *list = kmalloc(12 * sizeof(int));
         int count = return_task_list(list);
-	print_string("list_count->\0");
-	print_int(count);
-	print_string("\n\0");
-	return;
 
 	temp_cursor_pos = display_vga_text("+-------+----------------+", strlength("+-------+----------------+"), temp_cursor_pos, 0x0F);
         row++;                          
