@@ -153,12 +153,12 @@ void schedule(void){
 		return;
 	}
 
-	//if (current_task->time_slice <= current_task->priority){
-	//	current_task->time_slice++;
-	//	return;
-	//}else{
-	//	current_task->time_slice=0;
-	//}
+	if (current_task->state != TASK_ZOMBIE && current_task->time_slice <= current_task->priority){
+		current_task->time_slice++;
+		return;
+	}else{
+		current_task->time_slice=0;
+	}
 
 	struct task *new_task = ready_queue.head;
 	
