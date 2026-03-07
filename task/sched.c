@@ -104,12 +104,10 @@ void task_wrapper() {
 void exit_task(){
 	current_task->state = TASK_ZOMBIE;
 	current_task->time_slice = 0;
-	//print_string("exit()\n\0");
 	task_destroy(current_task->pid);
 	remove_task_from_array(current_task);
-	//dequeue_task();
-	//kfree(current_task);
-	print_string("exit schedule()\n\0");
+
+	kfree(current_task);
 	schedule();
 }
 
@@ -162,7 +160,6 @@ void schedule(void){
 
 	struct task *new_task = ready_queue.head;
 	
-	if (new_task->pid == 3) print_string("new_task->pid->3\n\0");
         dequeue_task();
 	
 	if (new_task->state != TASK_READY){

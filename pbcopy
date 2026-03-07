@@ -1,0 +1,2 @@
+qemu-system-i386 -hda disk.img -kernel kernel.bin -m 100M
+qemu-system-i386 -hda disk.img -kernel kernel.bin -m 100M

@@ -42,8 +42,12 @@ static void test_task_function(void){
 	//temp_cursor_pos = display_vga_text("process successfuly running!", 28, temp_cursor_pos, 0xF);
         uint64_t count = 0;
 
-	print_string("process started!\n\0");
-	//int file_chan = fs_open("/home/test.txt", 0777);
+	//print_string("process started!\n\0");
+	int file_chan = fs_open("/home/test.txt", 0777);
+	
+	char *buf = "gavins test for blocked tasks\0";
+	fs_write(file_chan, buf, sizeof(buf));
+	fs_close(file_chan);
 //        while (1){
 	//	for (int i = 0; i < 100; i++){
 			//if (i = 50) print_string("yo\0");

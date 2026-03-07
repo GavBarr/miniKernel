@@ -250,7 +250,8 @@ int ide_read_block(struct block_device *dev, uint32_t lba, void *buffer){
 
 void block_device_complete(struct block_device *disk){
 	if (disk->waiting_task){
-		//task_unblock(disk->waiting_task);
+	
+		task_unblock(disk->waiting_task);
 		disk->waiting_task = NULL;
 	}
 }
@@ -260,7 +261,7 @@ void ide_primary_irq_handler(){
 
 	//if there is any error then address it accordingly
 	if (status & 0x01){
-	
+		print_string("ide_primary_irq_handler() ERROR\n\0");
 	}
 
 	//if data is ready (DRQ bit)
@@ -274,12 +275,14 @@ void ide_secondary_irq_handler(){
 
 	//if there is any error then address it accordingly
         if (status & 0x01){
-
+		print_string("ide_secondary_irq_handler() ERROR\n\0");
         }
 
         //if data is ready (DRQ bit)
         if (status & 0x08){
 
+		print_string("ide_secondary_irq_handler() DRQ ready\n\0");
+		block_device_complete(main_disk);	
         }
 
 }

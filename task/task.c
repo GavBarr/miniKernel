@@ -148,17 +148,19 @@ int task_destroy(int pid){
 	return 0;
 }
 
-//void task_block(struct task *task){
-//	task->state = TASK_BLOCKED;
+void task_block(struct task *task){
+	task->state = TASK_BLOCKED;
 
-//	schedule();
-//}
+	print_string("task_block()\n\0");
+	schedule();
+}
 
-//void task_unblock(struct task *task){
-//	task->state = TASK_READY;
-
-	//schedule();
-//}
+void task_unblock(struct task *task){
+	task->state = TASK_READY;
+	
+	print_string("task_unblock()\n\0");
+	schedule();
+}
 
 int task_set_state(struct task *task ,task_state state){
 	
